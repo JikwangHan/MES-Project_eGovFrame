@@ -24,7 +24,13 @@
   - telemetry (표준 정규화 모델)
 - 응답: 201 Created
 
-## 3) Equipment List
+## 3) Direct Ingest (Device -> MES)
+- POST /api/direct-uplink
+- 제조장비가 MES Web 서비스로 직접 연동될 때 사용한다.
+- 프로토콜 정의서에 맞춘 payload만 허용한다.
+- 프로토콜 정의서는 추후 확정되며, 다수의 프로토콜을 지원할 수 있다.
+
+## 4) Equipment List
 - GET /api/equipments
 - 쿼리:
   - status (선택, 유효값만 허용)
@@ -35,13 +41,13 @@
   - lastSeenAt
   - status
 
-## 4) Equipment Telemetry
+## 5) Equipment Telemetry
 - GET /api/equipments/{deviceId}/telemetry
 - 쿼리:
   - limit (1..100, 기본 20)
 - 응답: 200 OK
 
-## 5) Dashboard Summary
+## 6) Dashboard Summary
 - GET /api/dashboard/summary
 - 응답: 200 OK
 - 필드(예시):
