@@ -4,8 +4,10 @@ import java.io.File;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.startup.Tomcat;
-import org.springframework.web.context.support.XmlWebApplicationContext;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
+
+import com.mes.web.config.WebConfig;
 
 public class EmbeddedTomcat {
     // 외장 Tomcat 배포가 어려운 환경에서도 동일한 스캐폴딩을 검증하기 위한 실행 진입점이다.
@@ -21,13 +23,15 @@ public class EmbeddedTomcat {
         File baseDir = new File(".");
         Context context = tomcat.addContext("", baseDir.getAbsolutePath());
 
-        // XML 기반 컨텍스트를 로딩하여 운영/외장 Tomcat과 동일한 설정을 공유한다.
-        XmlWebApplicationContext appContext = new XmlWebApplicationContext();
-        appContext.setConfigLocation("classpath:/spring/servlet-context.xml");
+        // Java Config 기반 컨텍스트로 실행하여 실행 위치와 무관하게 동작하도록 한다.
+        AnnotationConfigWebApplicationContext appContext = new AnnotationConfigWebApplicationContext();
+        appContext.setServletContext(context.getServletContext());
+        appContext.register(WebConfig.class);
+        appContext.refresh();
 
         DispatcherServlet dispatcher = new DispatcherServlet(appContext);
         Tomcat.addServlet(context, "dispatcher", dispatcher).setLoadOnStartup(1);
-        context.addServletMappingDecoded("/", "dispatcher");
+        context.addServletMappingDecoded("/*", "dispatcher");
 
         tomcat.start();
         tomcat.getServer().await();
