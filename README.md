@@ -1,36 +1,23 @@
 # eGovFrame 기반 MES Project (Part 1)
 
-이 저장소는 eGovFrame 기반 MES 프로젝트의 시작점을 잡기 위한 기본 구조입니다.
-초보자도 따라할 수 있도록 단계별 안내를 제공합니다.
+## 목표
+- 기존 MES-System(Node 기반)의 서비스 기능/운영 증빙을 100% 유지하면서 eGovFrame으로 재구축
+- 코드를 포팅하지 않고 계약(Contract)과 테스트 이식
+- JDK 17 + Tomcat 9(embedded) 기준 스캐폴딩
 
-## 1. 지금 상태
-- 이 레포는 비어있었기 때문에, 기본 폴더/문서 구조부터 만들었습니다.
-- 실제 기능 개발 전에 요구사항/환경/로드맵을 정리하는 단계입니다.
+## PR-00 산출물
+- mes-web-egov: /health 200
+- 공통 로깅 유틸: pass/fail/skip 라인 출력
+- smoke 스크립트 1개
+- 문서 증빙
 
-## 2. 다음에 할 일 (초보자용 순서)
-1) 개발 환경 확인  
-   - 사용 중인 PC에 Java, Maven, eGovFrame 개발 환경이 있는지 확인합니다.
-2) 요구사항 정리  
-   - MES에서 꼭 필요한 기능 목록을 정합니다.
-3) 프로젝트 기본 설정  
-   - eGovFrame 프로젝트 생성 후, 이 구조에 맞춰 정리합니다.
+## 실행 방법 (10줄 이내)
+1) Windows 실행: mvn -pl mes-web-egov spring-boot:run
+2) Windows health: powershell -ExecutionPolicy Bypass -File scripts/smoke-health.ps1
+3) Linux/macOS 실행: mvn -pl mes-web-egov spring-boot:run
+4) Linux/macOS health: sh scripts/smoke-health.sh
+5) 종료: Ctrl+C
 
-## 3. 문서 위치
-- 프로젝트 개요: `docs/01-프로젝트-개요.md`
-- 요구사항 정리: `docs/02-요구사항-정리.md`
-- 설치/환경: `docs/03-설치-환경.md`
-- 로드맵: `docs/04-로드맵.md`
-
-## 4. 폴더 구조 (현재)
-```
-docs/
-scripts/
-src/
-  main/
-    java/
-    resources/
-  test/
-    java/
-```
-
-필요한 내용부터 채워가며 단계적으로 진행하겠습니다.
+## 문서
+- 원칙 정리: docs/00-원칙-정리.md
+- PR-00 증빙: docs/PR-00-스캐폴딩.md
