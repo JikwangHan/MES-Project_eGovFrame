@@ -12,6 +12,7 @@
   <modules>
     <module>mes-common</module>
     <module>mes-contracts</module>
+    <module>edge-gateway-egov</module>
     <module>mes-web-egov</module>
   </modules>
 

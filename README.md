@@ -19,13 +19,17 @@
 - mes-web-egov: 최소 API 구현
 - smoke 스크립트 1개
 
+## PR-03 산출물
+- edge-gateway-egov: 시뮬레이터 기반 uplink
+- smoke 스크립트 1개
+
 ## 실행 방법 (10줄 이내)
 1) 공통 빌드: mvn -s scripts/maven-settings.egov.xml -pl mes-web-egov -am package
 2) embedded 실행: mvn -s scripts/maven-settings.egov.xml -pl mes-web-egov -am exec:java
 3) 외장 Tomcat 9: mes-web-egov/target/*.war 배포 후 기동
 4) 포트: 18080 (다르면 스크립트의 URL만 변경)
-5) Windows 스모크: health/contracts/api 순서로 ps1 실행
-6) Linux/macOS 스모크: health/contracts/api 순서로 sh 실행
+5) Windows 스모크: health/contracts/api/gateway 순서로 ps1 실행
+6) Linux/macOS 스모크: health/contracts/api/gateway 순서로 sh 실행
 7) 종료: Ctrl+C
 
 ## 문서
@@ -33,4 +37,6 @@
 - PR-00 증빙: docs/PR-00-스캐폴딩.md
 - PR-01 증빙: docs/PR-01-계약-정리.md
 - PR-02 증빙: docs/PR-02-최소-API.md
+- PR-03 증빙: docs/PR-03-게이트웨이-설계.md
 - 의존성 설정: docs/05-의존성-설정.md
+- AI 미들웨어 P0 설계: docs/AI-미들웨어-P0-설계.md
