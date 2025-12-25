@@ -8,6 +8,7 @@ ui_path="/ui"
 ui_sample_path="/ui/login"
 ui_sample_path2="/ui/orders"
 ui_sample_path3="/ui/equipment/status"
+ui_sample_path4="/ui/dashboard/production"
 tmp_out="${TMPDIR:-/tmp}/mes-ui.out"
 tmp_err="${TMPDIR:-/tmp}/mes-ui.err"
 
@@ -38,7 +39,8 @@ while [ "$i" -le "$max_try" ]; do
   ui_sample_code="$(curl -s -o /dev/null -w "%{http_code}" "$base$ui_sample_path" || true)"
   ui_sample_code2="$(curl -s -o /dev/null -w "%{http_code}" "$base$ui_sample_path2" || true)"
   ui_sample_code3="$(curl -s -o /dev/null -w "%{http_code}" "$base$ui_sample_path3" || true)"
-  if [ "$ui_code" = "200" ] && [ "$ui_sample_code" = "200" ] && [ "$ui_sample_code2" = "200" ] && [ "$ui_sample_code3" = "200" ]; then
+  ui_sample_code4="$(curl -s -o /dev/null -w "%{http_code}" "$base$ui_sample_path4" || true)"
+  if [ "$ui_code" = "200" ] && [ "$ui_sample_code" = "200" ] && [ "$ui_sample_code2" = "200" ] && [ "$ui_sample_code3" = "200" ] && [ "$ui_sample_code4" = "200" ]; then
     printf '%s\n' "[PASS] ui smoke"
     exit 0
   fi
