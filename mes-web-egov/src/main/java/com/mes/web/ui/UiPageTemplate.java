@@ -51,6 +51,10 @@ public final class UiPageTemplate {
         html.append("<div class=\"box\">요약 카드 2(데이터 준비 중)</div>");
         html.append("<div class=\"box\">요약 카드 3(데이터 준비 중)</div>");
         html.append("</div>");
+        html.append("<div class=\"card\" style=\"margin-bottom:16px;background:#fef3c7;\">");
+        html.append("<strong>알림/상태 배너(예정)</strong>");
+        html.append("<p>시스템 상태/주의 메시지는 후속 단계에서 적용합니다.</p>");
+        html.append("</div>");
         html.append("<div class=\"card\" style=\"margin-bottom:16px;\">");
         html.append("<strong>페이지 설명</strong>");
         html.append("<p>").append(escape(message)).append("</p>");
