@@ -6,6 +6,7 @@ $base = "http://localhost:18080"
 $uiPath = "/ui"
 $uiSamplePath = "/ui/login"
 $uiSamplePath2 = "/ui/orders"
+$uiSamplePath3 = "/ui/equipment/status"
 $tmpOut = Join-Path $env:TEMP "mes-ui.out"
 $tmpErr = Join-Path $env:TEMP "mes-ui.err"
 
@@ -31,19 +32,21 @@ try {
     $resp = $null
     $resp2 = $null
     $resp3 = $null
+    $resp4 = $null
     $maxTry = 10
     for ($i = 0; $i -lt $maxTry; $i++) {
         try {
             $resp = Invoke-WebRequest -Uri "$base$uiPath" -UseBasicParsing -TimeoutSec 5
             $resp2 = Invoke-WebRequest -Uri "$base$uiSamplePath" -UseBasicParsing -TimeoutSec 5
             $resp3 = Invoke-WebRequest -Uri "$base$uiSamplePath2" -UseBasicParsing -TimeoutSec 5
+            $resp4 = Invoke-WebRequest -Uri "$base$uiSamplePath3" -UseBasicParsing -TimeoutSec 5
             break
         } catch {
             Start-Sleep -Seconds 1
         }
     }
 
-    if ($resp -and $resp2 -and $resp3 -and $resp.StatusCode -eq 200 -and $resp2.StatusCode -eq 200 -and $resp3.StatusCode -eq 200) {
+    if ($resp -and $resp2 -and $resp3 -and $resp4 -and $resp.StatusCode -eq 200 -and $resp2.StatusCode -eq 200 -and $resp3.StatusCode -eq 200 -and $resp4.StatusCode -eq 200) {
         Write-Output "[PASS] ui smoke"
         exit 0
     }

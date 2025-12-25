@@ -23,6 +23,8 @@ public final class UiPageTemplate {
         html.append("nav a.active{color:#fff;font-weight:bold;}");
         html.append("main{flex:1;padding:20px;}");
         html.append(".card{background:#fff;border-radius:8px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,0.1);}");
+        html.append(".summary{display:flex;gap:12px;margin-bottom:16px;}");
+        html.append(".summary .box{flex:1;background:#e5e7eb;border-radius:8px;padding:12px;}");
         html.append("</style>");
         html.append("</head>");
         html.append("<body>");
@@ -44,6 +46,11 @@ public final class UiPageTemplate {
         }
         html.append("</nav>");
         html.append("<main>");
+        html.append("<div class=\"summary\">");
+        html.append("<div class=\"box\">요약 카드 1(데이터 준비 중)</div>");
+        html.append("<div class=\"box\">요약 카드 2(데이터 준비 중)</div>");
+        html.append("<div class=\"box\">요약 카드 3(데이터 준비 중)</div>");
+        html.append("</div>");
         html.append("<div class=\"card\">");
         html.append("<h1>").append(escape(heading)).append("</h1>");
         html.append("<p>").append(escape(message)).append("</p>");
