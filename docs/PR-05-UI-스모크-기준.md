@@ -21,3 +21,7 @@
 - [PASS] ui smoke
 - [FAIL] ui smoke
 - [SKIP] ui smoke
+
+## 스크립트 위치
+- Windows: `scripts/smoke-ui.ps1`
+- Linux: `scripts/smoke-ui.sh`

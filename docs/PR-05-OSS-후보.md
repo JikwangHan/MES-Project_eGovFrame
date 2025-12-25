@@ -21,3 +21,14 @@
 
 ## 비고
 - 최종 선택은 UI/UX 설계 문서의 패턴과 맞춤성, 라이선스 검토 결과로 확정한다.
+
+## 1차 선택(초안)
+- DB: MariaDB (GPL-2.0)
+- Grid: Tabulator (MIT)
+- Chart: Apache ECharts (Apache-2.0)
+- UI/UX: Bootstrap (MIT)
+
+## 선택 이유(요약)
+- 라이선스가 명확하고 무료 사용이 가능하다.
+- 문서화가 충분하고 커뮤니티 사용 사례가 많다.
+- eGovFrame 기반의 Java/Spring 환경과 함께 사용하기 용이하다.
