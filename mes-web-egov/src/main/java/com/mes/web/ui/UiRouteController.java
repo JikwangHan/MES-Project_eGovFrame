@@ -43,10 +43,11 @@ public class UiRouteController {
     }, produces = MediaType.TEXT_HTML_VALUE)
     public String uiRoute(HttpServletRequest request) {
         String path = request.getRequestURI();
+        String description = UiRouteDescriptions.describe(path);
         return UiPageTemplate.render(
             "MES UI",
             "MES UI 스캐폴딩",
-            "데이터 바인딩은 후속 단계에서 적용합니다.",
+            description,
             path
         );
     }

@@ -30,13 +30,17 @@ public final class UiPageTemplate {
         html.append("<div class=\"wrap\">");
         html.append("<nav>");
         html.append("<div>메뉴</div>");
-        for (UiMenu.MenuItem item : UiMenu.ITEMS) {
-            boolean active = item.path.equals(currentPath);
-            html.append("<a href=\"").append(item.path).append("\"");
-            if (active) {
-                html.append(" class=\"active\"");
+        for (UiMenu.MenuGroup group : UiMenu.GROUPS) {
+            html.append("<div style=\"margin-top:10px;font-weight:bold;\">")
+                .append(escape(group.label)).append("</div>");
+            for (UiMenu.MenuItem item : group.items) {
+                boolean active = item.path.equals(currentPath);
+                html.append("<a href=\"").append(item.path).append("\"");
+                if (active) {
+                    html.append(" class=\"active\"");
+                }
+                html.append(">").append(escape(item.label)).append("</a>");
             }
-            html.append(">").append(escape(item.label)).append("</a>");
         }
         html.append("</nav>");
         html.append("<main>");
