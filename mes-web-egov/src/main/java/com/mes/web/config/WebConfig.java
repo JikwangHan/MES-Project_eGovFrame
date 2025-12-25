@@ -8,6 +8,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import com.mes.web.api.ApiController;
 import com.mes.web.health.HealthController;
 import com.mes.web.ui.UiController;
+import com.mes.web.ui.UiRouteController;
 
 @Configuration
 @EnableWebMvc
@@ -32,5 +33,12 @@ public class WebConfig {
     @Bean
     public UiController uiController() {
         return new UiController();
+    }
+
+    // UiRouteController를 명시적으로 등록한다.
+    // 이유: /ui 하위 라우팅을 스모크 기준으로 제공하기 위함이다.
+    @Bean
+    public UiRouteController uiRouteController() {
+        return new UiRouteController();
     }
 }

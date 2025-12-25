@@ -4,6 +4,7 @@ $ErrorActionPreference = "Stop"
 # 이유: 데이터 바인딩 전 단계에서 화면 골격이 준비됐는지 빠르게 확인하기 위함이다.
 $base = "http://localhost:18080"
 $uiPath = "/ui"
+$uiSamplePath = "/ui/login"
 
 try {
     $health = Invoke-WebRequest -Uri "$base/health" -UseBasicParsing -TimeoutSec 5
@@ -18,7 +19,8 @@ try {
 
 try {
     $resp = Invoke-WebRequest -Uri "$base$uiPath" -UseBasicParsing -TimeoutSec 5
-    if ($resp.StatusCode -eq 200) {
+    $resp2 = Invoke-WebRequest -Uri "$base$uiSamplePath" -UseBasicParsing -TimeoutSec 5
+    if ($resp.StatusCode -eq 200 -and $resp2.StatusCode -eq 200) {
         Write-Output "[PASS] ui smoke"
         exit 0
     }

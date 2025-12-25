@@ -5,6 +5,7 @@ set -eu
 # 이유: 데이터 바인딩 전 단계에서 화면 골격이 준비됐는지 빠르게 확인하기 위함이다.
 base="http://localhost:18080"
 ui_path="/ui"
+ui_sample_path="/ui/login"
 
 health_code="$(curl -s -o /dev/null -w "%{http_code}" "$base/health" || true)"
 if [ "$health_code" != "200" ]; then
@@ -13,7 +14,8 @@ if [ "$health_code" != "200" ]; then
 fi
 
 ui_code="$(curl -s -o /dev/null -w "%{http_code}" "$base$ui_path" || true)"
-if [ "$ui_code" = "200" ]; then
+ui_sample_code="$(curl -s -o /dev/null -w "%{http_code}" "$base$ui_sample_path" || true)"
+if [ "$ui_code" = "200" ] && [ "$ui_sample_code" = "200" ]; then
   printf '%s\n' "[PASS] ui smoke"
   exit 0
 fi
