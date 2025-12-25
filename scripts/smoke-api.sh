@@ -1,6 +1,9 @@
 #!/usr/bin/env sh
 set -eu
 
+# 목적: PR-02 최소 API가 200/201으로 응답하는지 확인한다.
+# 이유: API 기본 동작이 깨지면 연동 테스트가 의미가 없다.
+
 base="http://localhost:18080"
 
 code="$(curl -s -o /dev/null -w "%{http_code}" "$base/health" || true)"

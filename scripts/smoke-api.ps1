@@ -1,5 +1,8 @@
 $ErrorActionPreference = "Stop"
 
+# 목적: PR-02 최소 API가 200/201로 응답하는지 확인한다.
+# 이유: API 기본 동작이 깨지면 이후 모듈 연동이 불가능해지기 때문이다.
+
 function Assert-Status($resp, $expected) {
     if ($resp.StatusCode -ne $expected) {
         Write-Output "[FAIL] api status"
