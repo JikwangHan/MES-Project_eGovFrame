@@ -51,9 +51,12 @@ public final class UiPageTemplate {
         html.append("<div class=\"box\">요약 카드 2(데이터 준비 중)</div>");
         html.append("<div class=\"box\">요약 카드 3(데이터 준비 중)</div>");
         html.append("</div>");
+        html.append("<div class=\"card\" style=\"margin-bottom:16px;\">");
+        html.append("<strong>페이지 설명</strong>");
+        html.append("<p>").append(escape(message)).append("</p>");
+        html.append("</div>");
         html.append("<div class=\"card\">");
         html.append("<h1>").append(escape(heading)).append("</h1>");
-        html.append("<p>").append(escape(message)).append("</p>");
         html.append("<p>요청 경로: ").append(escape(currentPath)).append("</p>");
         html.append("</div>");
         html.append("</main>");
