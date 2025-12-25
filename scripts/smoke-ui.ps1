@@ -11,6 +11,7 @@ $uiSamplePath4 = "/ui/dashboard/production"
 $uiSamplePath5 = "/ui/quality/defects/status"
 $uiSamplePath6 = "/ui/inventory/status"
 $uiSamplePath7 = "/ui/master/items"
+$uiSamplePath8 = "/ui/admin/users"
 $tmpOut = Join-Path $env:TEMP "mes-ui.out"
 $tmpErr = Join-Path $env:TEMP "mes-ui.err"
 
@@ -41,6 +42,7 @@ try {
     $resp6 = $null
     $resp7 = $null
     $resp8 = $null
+    $resp9 = $null
     $maxTry = 10
     for ($i = 0; $i -lt $maxTry; $i++) {
         try {
@@ -52,13 +54,14 @@ try {
             $resp6 = Invoke-WebRequest -Uri "$base$uiSamplePath5" -UseBasicParsing -TimeoutSec 5
             $resp7 = Invoke-WebRequest -Uri "$base$uiSamplePath6" -UseBasicParsing -TimeoutSec 5
             $resp8 = Invoke-WebRequest -Uri "$base$uiSamplePath7" -UseBasicParsing -TimeoutSec 5
+            $resp9 = Invoke-WebRequest -Uri "$base$uiSamplePath8" -UseBasicParsing -TimeoutSec 5
             break
         } catch {
             Start-Sleep -Seconds 1
         }
     }
 
-    if ($resp -and $resp2 -and $resp3 -and $resp4 -and $resp5 -and $resp6 -and $resp7 -and $resp8 -and $resp.StatusCode -eq 200 -and $resp2.StatusCode -eq 200 -and $resp3.StatusCode -eq 200 -and $resp4.StatusCode -eq 200 -and $resp5.StatusCode -eq 200 -and $resp6.StatusCode -eq 200 -and $resp7.StatusCode -eq 200 -and $resp8.StatusCode -eq 200) {
+    if ($resp -and $resp2 -and $resp3 -and $resp4 -and $resp5 -and $resp6 -and $resp7 -and $resp8 -and $resp9 -and $resp.StatusCode -eq 200 -and $resp2.StatusCode -eq 200 -and $resp3.StatusCode -eq 200 -and $resp4.StatusCode -eq 200 -and $resp5.StatusCode -eq 200 -and $resp6.StatusCode -eq 200 -and $resp7.StatusCode -eq 200 -and $resp8.StatusCode -eq 200 -and $resp9.StatusCode -eq 200) {
         Write-Output "[PASS] ui smoke"
         exit 0
     }

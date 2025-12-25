@@ -63,6 +63,10 @@ public final class UiPageTemplate {
         html.append("<strong>테이블 영역(예정)</strong>");
         html.append("<p>그리드/테이블 UI는 후속 단계에서 적용합니다.</p>");
         html.append("</div>");
+        html.append("<div class=\"card\" style=\"margin-bottom:16px;\">");
+        html.append("<strong>액션 버튼 영역(예정)</strong>");
+        html.append("<p>등록/수정/삭제 버튼은 후속 단계에서 적용합니다.</p>");
+        html.append("</div>");
         html.append("<div class=\"card\">");
         html.append("<h1>").append(escape(heading)).append("</h1>");
         html.append("<p>요청 경로: ").append(escape(currentPath)).append("</p>");
