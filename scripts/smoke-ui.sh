@@ -6,19 +6,41 @@ set -eu
 base="http://localhost:18080"
 ui_path="/ui"
 ui_sample_path="/ui/login"
+tmp_out="${TMPDIR:-/tmp}/mes-ui.out"
+tmp_err="${TMPDIR:-/tmp}/mes-ui.err"
 
+# 먼저 서버가 떠 있는지 확인하고, 없다면 자동으로 실행한다.
+# 이유: 스모크가 단독으로도 실행되도록 하기 위함이다.
+started=0
 health_code="$(curl -s -o /dev/null -w "%{http_code}" "$base/health" || true)"
 if [ "$health_code" != "200" ]; then
-  printf '%s\n' "[SKIP] ui smoke"
-  exit 2
+  mvn -s scripts/maven-settings.egov.xml -pl mes-web-egov -am package -q >/dev/null
+  mvn -s scripts/maven-settings.egov.xml -pl mes-web-egov exec:java -q >"$tmp_out" 2>"$tmp_err" &
+  pid=$!
+  started=1
 fi
 
-ui_code="$(curl -s -o /dev/null -w "%{http_code}" "$base$ui_path" || true)"
-ui_sample_code="$(curl -s -o /dev/null -w "%{http_code}" "$base$ui_sample_path" || true)"
-if [ "$ui_code" = "200" ] && [ "$ui_sample_code" = "200" ]; then
-  printf '%s\n' "[PASS] ui smoke"
-  exit 0
-fi
+cleanup() {
+  if [ "$started" -eq 1 ] && kill -0 "$pid" >/dev/null 2>&1; then
+    kill -9 "$pid" >/dev/null 2>&1 || true
+  fi
+}
+trap cleanup EXIT
 
-printf '%s\n' "[SKIP] ui smoke"
-exit 2
+ui_code=""
+ui_sample_code=""
+max_try=10
+i=1
+while [ "$i" -le "$max_try" ]; do
+  ui_code="$(curl -s -o /dev/null -w "%{http_code}" "$base$ui_path" || true)"
+  ui_sample_code="$(curl -s -o /dev/null -w "%{http_code}" "$base$ui_sample_path" || true)"
+  if [ "$ui_code" = "200" ] && [ "$ui_sample_code" = "200" ]; then
+    printf '%s\n' "[PASS] ui smoke"
+    exit 0
+  fi
+  i=$((i + 1))
+  sleep 1
+done
+
+printf '%s\n' "[FAIL] ui smoke"
+exit 1

@@ -10,13 +10,11 @@ public class UiController {
     // 이유: 화면 라우팅과 레이아웃 골격이 준비되었는지 스모크로 빠르게 확인하기 위함이다.
     @GetMapping(value = "/ui", produces = MediaType.TEXT_HTML_VALUE)
     public String uiHome() {
-        return "<!doctype html>"
-            + "<html lang=\"ko\">"
-            + "<head><meta charset=\"utf-8\"><title>MES UI</title></head>"
-            + "<body>"
-            + "<h1>MES UI 스캐폴딩</h1>"
-            + "<p>화면 골격 준비 완료. 데이터 바인딩은 후속 단계에서 적용합니다.</p>"
-            + "</body>"
-            + "</html>";
+        return UiPageTemplate.render(
+            "MES UI",
+            "MES UI 스캐폴딩",
+            "화면 골격 준비 완료. 데이터 바인딩은 후속 단계에서 적용합니다.",
+            "/ui"
+        );
     }
 }
