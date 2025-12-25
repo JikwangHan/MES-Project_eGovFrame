@@ -7,6 +7,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import com.mes.web.api.ApiController;
 import com.mes.web.health.HealthController;
+import com.mes.web.ui.UiController;
 
 @Configuration
 @EnableWebMvc
@@ -24,5 +25,12 @@ public class WebConfig {
     @Bean
     public ApiController apiController() {
         return new ApiController();
+    }
+
+    // UiController를 명시적으로 등록한다.
+    // 이유: UI 스캐폴딩 라우팅(/ui)을 스모크 기준으로 제공하기 위함이다.
+    @Bean
+    public UiController uiController() {
+        return new UiController();
     }
 }
