@@ -4,4 +4,5 @@ run.err
 mw.out
 mw.err
 tomcat.*/
+data/
 docs/User_Request/
