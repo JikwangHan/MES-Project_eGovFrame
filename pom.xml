@@ -13,6 +13,7 @@
     <module>mes-common</module>
     <module>mes-contracts</module>
     <module>edge-gateway-egov</module>
+    <module>ai-middleware-egov</module>
     <module>mes-web-egov</module>
   </modules>
 

@@ -1,4 +1,7 @@
 **/target/
 run.out
 run.err
+mw.out
+mw.err
+tomcat.*/
 docs/User_Request/
