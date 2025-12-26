@@ -72,3 +72,23 @@
   - unit
   - formula
   - remark
+- 응답 예시:
+```json
+{
+  "result": "OK",
+  "message": "success",
+  "data": [
+    {
+      "kpiId": "KPI-001",
+      "name": "생산성",
+      "targetValue": 100,
+      "currentValue": 82,
+      "progressRate": 0.82,
+      "resultValue": 82,
+      "unit": "%",
+      "formula": "current/target*100",
+      "remark": "샘플"
+    }
+  ]
+}
+```
