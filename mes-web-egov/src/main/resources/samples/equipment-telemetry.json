@@ -1,0 +1,9 @@
+[
+  {
+    "deviceId": "EQ-001",
+    "timestamp": "2025-12-24T00:00:00",
+    "metric": "temperature",
+    "value": 36.5,
+    "unit": "C"
+  }
+]

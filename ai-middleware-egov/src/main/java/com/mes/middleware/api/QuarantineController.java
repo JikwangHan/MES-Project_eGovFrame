@@ -15,10 +15,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class QuarantineController {
+    // 격리 데이터를 보관하는 폴더(상대 경로).
+    // 이유: 장비/프로토콜을 판단하지 못한 원본을 따로 관리해야 재처리가 가능하다.
     private static final String QUARANTINE_DIR = "data/quarantine";
 
     // 목적: 격리된 원본 목록을 조회한다.
     // 이유: P1 단계에서 격리 상태를 확인할 최소 조회 기능이 필요하다.
+    // 입력: 없음.
+    // 출력: 격리 파일명 목록.
     @GetMapping("/api/quarantine")
     public ResponseEntity<Map<String, Object>> list() {
         try {
@@ -36,6 +40,7 @@ public class QuarantineController {
         }
     }
 
+    // 공통 성공 응답 포맷.
     private Map<String, Object> ok(Object data) {
         Map<String, Object> res = new LinkedHashMap<>();
         res.put("result", "OK");
@@ -44,6 +49,7 @@ public class QuarantineController {
         return res;
     }
 
+    // 공통 실패 응답 포맷.
     private Map<String, Object> fail(String errorCode, String message) {
         Map<String, Object> res = new LinkedHashMap<>();
         res.put("result", "FAIL");

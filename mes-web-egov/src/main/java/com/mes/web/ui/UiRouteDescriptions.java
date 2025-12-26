@@ -8,6 +8,8 @@ public final class UiRouteDescriptions {
 
     static {
         // 공통
+        // 목적: 화면별 "설명 문자열"을 미리 정의해 두고, 화면 진입 시 즉시 보여준다.
+        // 이유: 실제 데이터 바인딩 전에 화면의 목적/입력/검증/데이터소스를 합의할 수 있다.
         DESCRIPTIONS.put("/ui/login", "로그인 화면: 아이디/비밀번호로 인증한다. 필수 입력: 아이디, 비밀번호. 검증: 공백 불가. 데이터 소스(예정): 사용자/인증 API.");
         DESCRIPTIONS.put("/ui/account/change-password", "암호변경: 로그인 후 비밀번호를 변경한다. 필수 입력: 현재/신규/확인 비밀번호. 검증: 일치 여부. 데이터 소스(예정): 사용자/인증 API.");
         // 대시보드
@@ -16,6 +18,7 @@ public final class UiRouteDescriptions {
         // 생산관리
         DESCRIPTIONS.put("/ui/orders/summary", "수주현황: 수주 요약 지표를 확인한다. 필수 입력: 없음. 검증: 조회 조건. 데이터 소스(예정): 수주 집계 API.");
         DESCRIPTIONS.put("/ui/orders", "수주내역: 수주/납품/반품 내역을 관리한다. 필수 입력: 수주번호, 거래처. 검증: 중복 여부. 데이터 소스(예정): 수주/납품/반품 API.");
+        DESCRIPTIONS.put("/ui/jobs", "작업현황: 작업 목록을 요약한다. 필수 입력: 없음. 검증: 조회 조건. 데이터 소스(예정): 작업 API.");
         DESCRIPTIONS.put("/ui/work/orders", "작업관리: 작업 현황과 공정/분배를 관리한다. 필수 입력: 작업번호, 품목. 검증: 수량 범위. 데이터 소스(예정): 작업/공정 API.");
         DESCRIPTIONS.put("/ui/work/orders/issue", "작업지시: 작업지시 내역을 관리한다. 필수 입력: 지시번호, 일정. 검증: 날짜 범위. 데이터 소스(예정): 작업지시 API.");
         // 기준정보
@@ -48,6 +51,10 @@ public final class UiRouteDescriptions {
         // 유틸리티 클래스는 인스턴스화하지 않는다.
     }
 
+    // 목적: 경로에 대응하는 설명을 반환한다.
+    // 이유: 화면마다 요구사항이 다르므로, 명확한 설명을 한 곳에서 관리한다.
+    // 입력: 화면 경로.
+    // 출력: 설명 문자열(없으면 기본 안내).
     public static String describe(String path) {
         if (DESCRIPTIONS.containsKey(path)) {
             return DESCRIPTIONS.get(path);

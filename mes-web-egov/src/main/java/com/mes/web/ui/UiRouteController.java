@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class UiRouteController {
     // 목적: UI 문서에 정의된 화면 경로를 우선 라우팅만 제공한다.
     // 이유: 데이터 바인딩 전 단계에서 화면 접근 가능 여부를 스모크로 확인하기 위함이다.
+    // 입력: 브라우저가 요청한 경로.
+    // 출력: 공통 레이아웃 HTML(현재는 설명/자리표시자 중심).
     @GetMapping(value = {
         "/ui/login",
         "/ui/account/change-password",
@@ -17,6 +19,7 @@ public class UiRouteController {
         "/ui/calendar",
         "/ui/orders/summary",
         "/ui/orders",
+        "/ui/jobs",
         "/ui/deliveries",
         "/ui/returns",
         "/ui/work/status",
@@ -43,6 +46,7 @@ public class UiRouteController {
         "/ui/kpi"
     }, produces = MediaType.TEXT_HTML_VALUE)
     public String uiRoute(HttpServletRequest request) {
+        // 요청 경로에 맞는 설명을 찾아서 화면에 표시한다.
         String path = request.getRequestURI();
         String description = UiRouteDescriptions.describe(path);
         return UiPageTemplate.render(

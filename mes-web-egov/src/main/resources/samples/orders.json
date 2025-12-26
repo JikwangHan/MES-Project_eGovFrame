@@ -1,0 +1,20 @@
+[
+  {
+    "orderId": "ORD-001",
+    "productCode": "P-100",
+    "productName": "SampleProduct",
+    "partnerName": "PartnerA",
+    "quantity": 120,
+    "dueDate": "2025-12-31",
+    "status": "PLANNED"
+  },
+  {
+    "orderId": "ORD-002",
+    "productCode": "P-200",
+    "productName": "SampleItem",
+    "partnerName": "PartnerB",
+    "quantity": 80,
+    "dueDate": "2025-12-20",
+    "status": "DONE"
+  }
+]

@@ -1,19 +1,26 @@
 package com.mes.gateway;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.charset.StandardCharsets;
 
 public class GatewayApp {
+    // 목적: 장비 데이터를 MES로 전송하는 가장 단순한 시뮬레이터를 제공한다.
+    // 이유: 실제 장비가 없어도 업링크 흐름을 검증할 수 있어야 한다.
     public static void main(String[] args) {
-        // 기본 업링크 URL은 로컬 MES Web을 가정한다.
-        // 이유: 초기 스모크는 로컬에서 빠르게 반복 검증하는 것이 가장 안전하다.
-        String url = "http://localhost:18080/api/uplink";
+        // 기본 업링크 URL은 로컬 AI 미들웨어의 원시 수신 API를 가정한다.
+        // 이유: 장비/프로토콜이 미확정인 상태에서도 원시 수신 파이프라인을 검증할 수 있어야 한다.
+        String url = "http://localhost:18081/api/raw-ingest";
         boolean once = true;
+        String inputPath = null;
+        boolean stdin = false;
 
         for (int i = 0; i < args.length; i++) {
             if ("--url".equals(args[i]) && i + 1 < args.length) {
@@ -22,12 +29,19 @@ public class GatewayApp {
             if ("--once".equals(args[i])) {
                 once = true;
             }
+            if ("--input".equals(args[i]) && i + 1 < args.length) {
+                inputPath = args[i + 1];
+            }
+            if ("--stdin".equals(args[i])) {
+                stdin = true;
+            }
         }
 
         if (once) {
             // 단일 전송 모드로 업링크를 1회 수행한다.
             // 이유: 시뮬레이터 기반 PR-03에서는 최소 동작 검증이 목표이기 때문이다.
-            int status = postOnce(url);
+            String payload = loadPayload(inputPath, stdin);
+            int status = postOnce(url, payload);
             if (status == 201) {
                 System.out.println("[PASS] gateway uplink 201");
                 return;
@@ -38,14 +52,12 @@ public class GatewayApp {
         }
     }
 
-    private static int postOnce(String url) {
-        // 샘플 JSON을 읽어 업링크 바디로 사용한다.
-        // 이유: 데이터 포맷이 아직 고정되지 않았으므로, 간단한 표준 구조만 유지한다.
-        String payload = loadSamplePayload();
+    private static int postOnce(String url, String payload) {
+        // Java 표준 HttpClient로 간단히 전송한다.
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder(URI.create(url))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(payload))
+                .header("Content-Type", "application/octet-stream")
+                .POST(HttpRequest.BodyPublishers.ofString(payload == null ? "" : payload))
                 .build();
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -56,16 +68,47 @@ public class GatewayApp {
         }
     }
 
+    private static String loadPayload(String inputPath, boolean stdin) {
+        if (stdin) {
+            return readStdin();
+        }
+        if (inputPath != null && !inputPath.isBlank()) {
+            return readFile(inputPath);
+        }
+        return loadSamplePayload();
+    }
+
+    private static String readStdin() {
+        try (InputStream in = System.in; ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            byte[] buf = new byte[4096];
+            int len;
+            while ((len = in.read(buf)) != -1) {
+                out.write(buf, 0, len);
+            }
+            return out.toString(StandardCharsets.UTF_8);
+        } catch (IOException ex) {
+            return "";
+        }
+    }
+
+    private static String readFile(String inputPath) {
+        try {
+            return Files.readString(Path.of(inputPath), StandardCharsets.UTF_8);
+        } catch (IOException ex) {
+            return "";
+        }
+    }
+
     private static String loadSamplePayload() {
-        // 리소스에 샘플이 없더라도 동작하도록 {}를 반환한다.
+        // 리소스에 샘플이 없더라도 동작하도록 빈 문자열을 반환한다.
         // 이유: 파일 유무로 실행이 중단되면 스모크 자동화가 깨질 수 있다.
         try (InputStream in = GatewayApp.class.getResourceAsStream("/sample-uplink.json")) {
             if (in == null) {
-                return "{}";
+                return "";
             }
             return new String(in.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException ex) {
-            return "{}";
+            return "";
         }
     }
 }

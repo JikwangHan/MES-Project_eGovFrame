@@ -11,6 +11,8 @@ import com.mes.web.config.WebConfig;
 
 public class EmbeddedTomcat {
     // 외장 Tomcat 배포가 어려운 환경에서도 동일한 스캐폴딩을 검증하기 위한 실행 진입점이다.
+    // 목적: 별도의 WAS 설치 없이도 로컬 실행이 가능하도록 한다.
+    // 이유: 개발 초기 단계에서는 빠른 확인이 더 중요하기 때문이다.
     public static void main(String[] args) throws Exception {
         // 기본 포트는 18080이며, 운영 환경에서 충돌을 피하려면 server.port로 변경한다.
         int port = Integer.parseInt(System.getProperty("server.port", "18080"));

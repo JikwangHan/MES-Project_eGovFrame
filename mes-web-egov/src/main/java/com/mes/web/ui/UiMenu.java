@@ -5,6 +5,7 @@ import java.util.List;
 public final class UiMenu {
     // 목적: UI 스캐폴딩에서 공통 메뉴 목록을 한 곳에서 관리한다.
     // 이유: 화면 경로가 늘어나도 메뉴 구조를 쉽게 갱신할 수 있도록 하기 위함이다.
+    // 구성: 상위 그룹 + 그룹 안의 메뉴 아이템 목록.
     public static final List<MenuGroup> GROUPS = List.of(
         new MenuGroup("공통", List.of(
             new MenuItem("/ui/login", "로그인"),
@@ -56,20 +57,26 @@ public final class UiMenu {
     }
 
     public static final class MenuItem {
+        // 목적: 메뉴 항목의 "경로"와 "표시명"을 함께 담는다.
+        // 이유: 화면 이동과 라벨 표시가 항상 한 세트로 움직여야 하기 때문이다.
         public final String path;
         public final String label;
 
         public MenuItem(String path, String label) {
+            // 입력값은 그대로 보관한다. (추후 검증/국문화 확장 가능)
             this.path = path;
             this.label = label;
         }
     }
 
     public static final class MenuGroup {
+        // 목적: 메뉴를 영역별로 묶어 가독성을 높인다.
+        // 이유: 화면 수가 많을 때도 빠르게 찾을 수 있도록 한다.
         public final String label;
         public final List<MenuItem> items;
 
         public MenuGroup(String label, List<MenuItem> items) {
+            // 입력값은 그대로 보관한다. (추후 권한/표시조건 확장 가능)
             this.label = label;
             this.items = items;
         }

@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class UiController {
     // 목적: UI 스캐폴딩의 최소 진입점을 제공한다.
     // 이유: 화면 라우팅과 레이아웃 골격이 준비되었는지 스모크로 빠르게 확인하기 위함이다.
+    // 입력: /ui 경로 요청.
+    // 출력: 공통 레이아웃 HTML.
     @GetMapping(value = "/ui", produces = MediaType.TEXT_HTML_VALUE)
     public String uiHome() {
         return UiPageTemplate.render(

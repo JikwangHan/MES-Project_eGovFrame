@@ -1,0 +1,18 @@
+[
+  {
+    "jobId": "JOB-001",
+    "orderId": "ORD-001",
+    "processName": "Cutting",
+    "startAt": "2025-12-24T09:00:00",
+    "endAt": "2025-12-24T12:00:00",
+    "status": "DONE"
+  },
+  {
+    "jobId": "JOB-002",
+    "orderId": "ORD-002",
+    "processName": "Welding",
+    "startAt": "2025-12-20T10:00:00",
+    "endAt": "2025-12-20T14:00:00",
+    "status": "IN_PROGRESS"
+  }
+]

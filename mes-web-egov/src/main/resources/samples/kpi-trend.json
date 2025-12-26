@@ -1,0 +1,30 @@
+[
+  {
+    "kpiId": "KPI-001",
+    "name": "생산성",
+    "date": "2025-12-20",
+    "targetValue": 100,
+    "currentValue": 80
+  },
+  {
+    "kpiId": "KPI-001",
+    "name": "생산성",
+    "date": "2025-12-21",
+    "targetValue": 100,
+    "currentValue": 82
+  },
+  {
+    "kpiId": "KPI-001",
+    "name": "생산성",
+    "date": "2025-12-22",
+    "targetValue": 100,
+    "currentValue": 85
+  },
+  {
+    "kpiId": "KPI-002",
+    "name": "불량률",
+    "date": "2025-12-22",
+    "targetValue": 2,
+    "currentValue": 1.5
+  }
+]

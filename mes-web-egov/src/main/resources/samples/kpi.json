@@ -1,0 +1,26 @@
+[
+  {
+    "kpiId": "KPI-001",
+    "name": "생산성",
+    "targetValue": 100,
+    "currentValue": 82,
+    "progressRate": 0.82,
+    "resultValue": 82,
+    "unit": "%",
+    "formula": "current/target*100",
+    "remark": "샘플",
+    "date": "2025-12-24"
+  },
+  {
+    "kpiId": "KPI-002",
+    "name": "불량률",
+    "targetValue": 2,
+    "currentValue": 1.5,
+    "progressRate": 0.75,
+    "resultValue": 1.5,
+    "unit": "%",
+    "formula": "current/target*100",
+    "remark": "샘플",
+    "date": "2025-12-20"
+  }
+]

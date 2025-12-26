@@ -106,7 +106,88 @@
 }
 ```
 
-## 8) External Sync (MES -> External)
+## 8) KPI Trend
+- GET /api/kpi/trend
+- 쿼리:
+  - from (기간 시작, 선택)
+  - to (기간 종료, 선택)
+  - kpiId (선택)
+  - limit (1..100)
+- 응답: 200 OK
+- 필드(예시):
+  - kpiId
+  - name
+  - date
+  - targetValue
+  - currentValue
+
+## 9) Orders
+- GET /api/orders
+- 쿼리:
+  - orderId (선택)
+  - partnerName (선택)
+  - dueFrom (선택)
+  - dueTo (선택)
+  - status (선택, PLANNED/IN_PROGRESS/DONE)
+  - limit (1..100, 기본 20)
+- 응답: 200 OK
+- 필드(예시):
+  - orderId
+  - productCode
+  - productName
+  - quantity
+  - dueDate
+  - status
+
+## 10) Jobs
+- GET /api/jobs
+- 쿼리:
+  - jobId (선택)
+  - orderId (선택)
+  - processName (선택)
+  - from (선택)
+  - to (선택)
+  - status (선택, PLANNED/IN_PROGRESS/DONE)
+  - limit (1..100, 기본 20)
+- 응답: 200 OK
+- 필드(예시):
+  - jobId
+  - orderId
+  - processName
+  - startAt
+  - endAt
+  - status
+
+## 11) External Sync (MES -> External)
 - POST /api/external-sync
 - 설명: 외부기관 연계를 위한 전송 트리거
 - 응답: 200 OK
+
+## 공통 검증 규칙(초안)
+- 날짜 형식: YYYY-MM-DD, 월/일 범위 유효성 포함 (형식 오류 시 400)
+- 상태 코드: PLANNED/IN_PROGRESS/DONE (형식 오류 시 400)
+- 기간 역전(from > to) 금지 (형식 오류 시 400)
+
+## 공통 400 응답 예시
+```json
+{
+  "result": "FAIL",
+  "message": "invalid date format",
+  "errorCode": "E-1001",
+  "data": null
+}
+```
+
+```json
+{
+  "result": "FAIL",
+  "message": "invalid status",
+  "errorCode": "E-1002",
+  "data": null
+}
+```
+
+## 에러코드 요약(초안)
+- E-1001: invalid date format
+- E-1002: invalid status
+- E-1003: invalid date range

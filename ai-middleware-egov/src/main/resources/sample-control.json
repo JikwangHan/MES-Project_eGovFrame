@@ -1,0 +1,6 @@
+{
+  "command": "START",
+  "target": "DEVICE-UNKNOWN",
+  "requestedAt": "2025-01-01T00:00:00Z",
+  "note": "protocol-agnostic sample"
+}

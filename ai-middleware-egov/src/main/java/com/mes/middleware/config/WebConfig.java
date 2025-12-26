@@ -10,4 +10,5 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 public class WebConfig {
     // Java Config 기반으로 컨트롤러를 자동 스캔한다.
     // 이유: XML 없이도 설정을 유지할 수 있어 향후 변경에 유연하다.
+    // 구성: com.mes.middleware 하위의 @RestController/@Service를 모두 스캔한다.
 }
