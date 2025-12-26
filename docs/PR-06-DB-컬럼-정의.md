@@ -1,36 +1,37 @@
 # PR-06: DB 컬럼 정의(초안)
 
 ## company
-- company_id (PK)
-- name
+- company_id (PK, NOT NULL)
+- name (NOT NULL)
 
 ## equipment
-- device_id (PK)
-- company_id (FK)
-- name
-- status
+- device_id (PK, NOT NULL)
+- company_id (FK, NOT NULL)
+- name (NOT NULL)
+- status (NOT NULL)
 
 ## telemetry
-- telemetry_id (PK)
-- company_id (FK)
-- device_id (FK)
-- timestamp
-- metric_key
-- metric_value
-- unit
+- telemetry_id (PK, NOT NULL)
+- company_id (FK, NOT NULL)
+- device_id (FK, NOT NULL)
+- raw_id (NULL)
+- timestamp (NOT NULL)
+- metric_key (NOT NULL)
+- metric_value (NOT NULL)
+- unit (NULL)
 
 ## event_log
-- event_id (PK)
-- company_id (FK)
-- device_id (FK)
-- event_type
-- message
-- created_at
+- event_id (PK, NOT NULL)
+- company_id (FK, NOT NULL)
+- device_id (FK, NOT NULL)
+- event_type (NOT NULL)
+- message (NOT NULL)
+- created_at (NOT NULL)
 
 ## alarm
-- alarm_id (PK)
-- company_id (FK)
-- device_id (FK)
-- level
-- message
-- created_at
+- alarm_id (PK, NOT NULL)
+- company_id (FK, NOT NULL)
+- device_id (FK, NOT NULL)
+- level (NOT NULL)
+- message (NOT NULL)
+- created_at (NOT NULL)
