@@ -24,3 +24,32 @@ create table telemetry (
   unit varchar(32) null,
   primary key (telemetry_id)
 );
+
+create table event_log (
+  event_id bigint not null,
+  company_id varchar(64) not null,
+  device_id varchar(64) not null,
+  event_type varchar(64) not null,
+  message varchar(255) not null,
+  created_at timestamp not null,
+  primary key (event_id)
+);
+
+create table alarm (
+  alarm_id bigint not null,
+  company_id varchar(64) not null,
+  device_id varchar(64) not null,
+  level varchar(32) not null,
+  message varchar(255) not null,
+  created_at timestamp not null,
+  primary key (alarm_id)
+);
+
+create table raw_ingest (
+  raw_id bigint not null,
+  company_id varchar(64) not null,
+  device_id varchar(64) null,
+  received_at timestamp not null,
+  payload text not null,
+  primary key (raw_id)
+);

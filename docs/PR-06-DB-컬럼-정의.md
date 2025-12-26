@@ -4,6 +4,7 @@
 - company_id (PK, NOT NULL)
 - name (NOT NULL)
 - 타입: company_id=VARCHAR, name=VARCHAR
+- 길이 기준: company_id=64, name=128
 
 ## equipment
 - device_id (PK, NOT NULL)
@@ -11,6 +12,7 @@
 - name (NOT NULL)
 - status (NOT NULL)
 - 타입: device_id=VARCHAR, company_id=VARCHAR, name=VARCHAR, status=VARCHAR
+- 길이 기준: device_id=64, company_id=64, name=128, status=32
 
 ## telemetry
 - telemetry_id (PK, NOT NULL)
@@ -24,6 +26,7 @@
 - 유니크 제약: (company_id, device_id, timestamp, metric_key)
 - 인덱스: company_id, device_id, timestamp
 - 타입: telemetry_id=BIGINT, company_id=VARCHAR, device_id=VARCHAR, raw_id=BIGINT, timestamp=TIMESTAMP, metric_key=VARCHAR, metric_value=DECIMAL, unit=VARCHAR
+- 길이 기준: company_id=64, device_id=64, metric_key=64, unit=32, metric_value=DECIMAL(18,4)
 
 ## event_log
 - event_id (PK, NOT NULL)
@@ -34,6 +37,7 @@
 - created_at (NOT NULL)
 - 인덱스: company_id, device_id, created_at
 - 타입: event_id=BIGINT, company_id=VARCHAR, device_id=VARCHAR, event_type=VARCHAR, message=VARCHAR, created_at=TIMESTAMP
+- 길이 기준: company_id=64, device_id=64, event_type=64, message=255
 
 ## alarm
 - alarm_id (PK, NOT NULL)
@@ -44,6 +48,7 @@
 - created_at (NOT NULL)
 - 인덱스: company_id, device_id, created_at
 - 타입: alarm_id=BIGINT, company_id=VARCHAR, device_id=VARCHAR, level=VARCHAR, message=VARCHAR, created_at=TIMESTAMP
+- 길이 기준: company_id=64, device_id=64, level=32, message=255
 
 ## raw_ingest
 - raw_id (PK, NOT NULL)
@@ -53,3 +58,4 @@
 - payload (NOT NULL)
 - 인덱스: company_id, device_id, received_at
 - 타입: raw_id=BIGINT, company_id=VARCHAR, device_id=VARCHAR, received_at=TIMESTAMP, payload=TEXT
+- 길이 기준: company_id=64, device_id=64
