@@ -19,6 +19,7 @@
 - metric_key (NOT NULL)
 - metric_value (NOT NULL)
 - unit (NULL)
+ - 유니크 제약: (company_id, device_id, timestamp, metric_key)
 
 ## event_log
 - event_id (PK, NOT NULL)
@@ -35,3 +36,10 @@
 - level (NOT NULL)
 - message (NOT NULL)
 - created_at (NOT NULL)
+
+## raw_ingest
+- raw_id (PK, NOT NULL)
+- company_id (FK, NOT NULL)
+- device_id (FK, NULL)
+- received_at (NOT NULL)
+- payload (NOT NULL)

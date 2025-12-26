@@ -9,6 +9,7 @@
 - telemetry
 - event_log
 - alarm
+- raw_ingest
 
 ## 비고
 - 멀티테넌트 기준은 companyId로 통일한다.
