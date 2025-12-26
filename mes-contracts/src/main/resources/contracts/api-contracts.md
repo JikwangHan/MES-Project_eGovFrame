@@ -62,3 +62,13 @@
   - to (기간 종료)
   - kpiId (선택)
 - 응답: 200 OK
+- 필드(예시):
+  - kpiId
+  - name
+  - targetValue
+  - currentValue
+  - progressRate
+  - resultValue
+  - unit
+  - formula
+  - remark
