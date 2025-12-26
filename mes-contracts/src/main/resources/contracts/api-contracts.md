@@ -54,3 +54,11 @@
   - okCount
   - warningCount
   - neverCount
+
+## 7) KPI
+- GET /api/kpi
+- 쿼리:
+  - from (기간 시작)
+  - to (기간 종료)
+  - kpiId (선택)
+- 응답: 200 OK
