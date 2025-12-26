@@ -71,6 +71,20 @@ public final class UiPageTemplate {
         html.append("<strong>액션 버튼 영역(예정)</strong>");
         html.append("<p>등록/수정/삭제 버튼은 후속 단계에서 적용합니다.</p>");
         html.append("</div>");
+        if ("/ui/kpi".equals(currentPath)) {
+            html.append("<div class=\"card\" style=\"margin-bottom:16px;\">");
+            html.append("<strong>KPI 그리드 영역(예정)</strong>");
+            html.append("<p>KPI명, 목표값, 현재값, 진척률, 결과값, 비고 등을 표시합니다.</p>");
+            html.append("</div>");
+            html.append("<div class=\"card\" style=\"margin-bottom:16px;\">");
+            html.append("<strong>KPI 차트 영역(예정)</strong>");
+            html.append("<p>목표값 vs 현재값의 시간별 추이를 표시합니다.</p>");
+            html.append("</div>");
+            html.append("<div class=\"card\" style=\"margin-bottom:16px;\">");
+            html.append("<strong>KPI 레포팅 영역(예정)</strong>");
+            html.append("<p>필터 조건을 반영한 보고서 출력 기능을 제공합니다.</p>");
+            html.append("</div>");
+        }
         html.append("<div class=\"card\">");
         html.append("<h1>").append(escape(heading)).append("</h1>");
         html.append("<p>요청 경로: ").append(escape(currentPath)).append("</p>");
