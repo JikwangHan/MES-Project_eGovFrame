@@ -3,18 +3,22 @@ package com.mes.web.api;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -23,6 +27,20 @@ public class ApiController {
     // 목적: 샘플 JSON을 객체로 읽어오는 데 사용할 변환기이다.
     // 이유: DB 연결 전 단계에서는 파일 기반 샘플로 화면 바인딩을 검증해야 하므로 JSON 파싱이 필요하다.
     private final ObjectMapper mapper = new ObjectMapper();
+
+    // 목적: DB가 없는 상황에서도 CRUD 흐름을 검증할 수 있도록 메모리 저장소를 둔다.
+    // 이유: 본개발 전 단계에서도 화면/계약 테스트를 통과해야 하므로 임시 저장소가 필요하다.
+    private final List<Map<String, Object>> equipmentStore = Collections.synchronizedList(new ArrayList<>());
+    private final List<Map<String, Object>> orderStore = Collections.synchronizedList(new ArrayList<>());
+    private final List<Map<String, Object>> jobStore = Collections.synchronizedList(new ArrayList<>());
+    private final List<Map<String, Object>> kpiStore = Collections.synchronizedList(new ArrayList<>());
+
+    // 목적: 임시 식별자 생성 규칙을 고정한다.
+    // 이유: 자동 생성된 ID가 중복되지 않도록 보장해야 한다.
+    private final AtomicInteger equipmentSeq = new AtomicInteger(2);
+    private final AtomicInteger orderSeq = new AtomicInteger(2);
+    private final AtomicInteger jobSeq = new AtomicInteger(2);
+    private final AtomicInteger kpiSeq = new AtomicInteger(2);
 
     // 업링크 수신 엔드포인트.
     // 목적: 게이트웨이에서 올라온 원본 데이터를 먼저 수신한다.
@@ -61,15 +79,7 @@ public class ApiController {
         }
 
         // 샘플 파일이 있으면 그 값을 우선 사용한다.
-        List<Map<String, Object>> list = sampleList("samples/equipments.json");
-        if (list == null || list.isEmpty()) {
-            list = new ArrayList<>();
-            Map<String, Object> item = new LinkedHashMap<>();
-            item.put("deviceId", "EQ-001");
-            item.put("lastSeenAt", "2025-12-24T00:00:00");
-            item.put("status", "OK");
-            list.add(item);
-        }
+        List<Map<String, Object>> list = ensureEquipmentStore();
         // 필터가 들어오면 샘플 상태도 같이 맞춰서 보여준다.
         if (status != null) {
             for (Map<String, Object> item : list) {
@@ -81,6 +91,72 @@ public class ApiController {
         return ResponseEntity.ok(ok(list));
     }
 
+    // 장비 단건 조회.
+    // 목적: 상세 화면에서 특정 장비의 기본 정보를 조회한다.
+    // 이유: 목록뿐 아니라 상세 화면 연결도 동시에 검증해야 한다.
+    @GetMapping("/api/equipments/{deviceId}")
+    public ResponseEntity<Map<String, Object>> equipmentDetail(@PathVariable("deviceId") String deviceId) {
+        Map<String, Object> item = findByKey(ensureEquipmentStore(), "deviceId", deviceId);
+        if (item == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(fail("E-404", "equipment not found"));
+        }
+        return ResponseEntity.ok(ok(item));
+    }
+
+    // 장비 등록.
+    // 목적: 장비 기본 CRUD 흐름을 검증한다.
+    // 입력: deviceId(선택), name(필수), status(선택).
+    @PostMapping("/api/equipments")
+    public ResponseEntity<Map<String, Object>> createEquipment(@RequestBody Map<String, Object> body) {
+        String name = asString(body.get("name"));
+        if (name.isBlank()) {
+            return badRequest("E-0001", "name required");
+        }
+        String deviceId = asString(body.get("deviceId"));
+        if (deviceId.isBlank()) {
+            deviceId = "EQ-" + String.format("%03d", equipmentSeq.getAndIncrement());
+        }
+        Map<String, Object> item = new LinkedHashMap<>();
+        item.put("deviceId", deviceId);
+        item.put("name", name);
+        item.put("model", asString(body.get("model")));
+        item.put("vendor", asString(body.get("vendor")));
+        item.put("lastSeenAt", asString(body.get("lastSeenAt")));
+        item.put("status", defaultStatus(asString(body.get("status")), "ACTIVE"));
+        equipmentStore.add(item);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ok(item));
+    }
+
+    // 장비 수정.
+    // 목적: 수정 흐름을 검증한다.
+    @PutMapping("/api/equipments/{deviceId}")
+    public ResponseEntity<Map<String, Object>> updateEquipment(
+            @PathVariable("deviceId") String deviceId,
+            @RequestBody Map<String, Object> body) {
+        Map<String, Object> item = findByKey(ensureEquipmentStore(), "deviceId", deviceId);
+        if (item == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(fail("E-404", "equipment not found"));
+        }
+        applyIfPresent(item, "name", body);
+        applyIfPresent(item, "model", body);
+        applyIfPresent(item, "vendor", body);
+        applyIfPresent(item, "lastSeenAt", body);
+        if (body.containsKey("status")) {
+            item.put("status", defaultStatus(asString(body.get("status")), "ACTIVE"));
+        }
+        return ResponseEntity.ok(ok(item));
+    }
+
+    // 장비 삭제.
+    // 목적: 삭제 흐름을 검증한다.
+    @DeleteMapping("/api/equipments/{deviceId}")
+    public ResponseEntity<Map<String, Object>> deleteEquipment(@PathVariable("deviceId") String deviceId) {
+        boolean removed = removeByKey(ensureEquipmentStore(), "deviceId", deviceId);
+        if (!removed) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(fail("E-404", "equipment not found"));
+        }
+        return ResponseEntity.ok(ok(Map.of("deleted", true)));
+    }
     // 장비별 telemetry 조회.
     // 목적: 설비 상세 화면이 사용할 최소 데이터 흐름을 제공한다.
     // 이유: 실제 수집 모듈이 준비되기 전까지 샘플 데이터로 화면을 검증해야 한다.
@@ -159,18 +235,7 @@ public class ApiController {
         }
 
         // 샘플 파일이 없으면 1건 기본값을 만든다.
-        List<Map<String, Object>> list = sampleList("samples/orders.json");
-        if (list == null || list.isEmpty()) {
-            list = new ArrayList<>();
-            Map<String, Object> item = new LinkedHashMap<>();
-            item.put("orderId", "ORD-001");
-            item.put("productCode", "P-100");
-            item.put("productName", "SampleProduct");
-            item.put("quantity", 120);
-            item.put("dueDate", "2025-12-31");
-            item.put("status", "PLANNED");
-            list.add(item);
-        }
+        List<Map<String, Object>> list = ensureOrderStore();
         // 필터 조건이 있으면 샘플 데이터에서도 동일하게 적용한다.
         list = filterOrders(list, orderId, partnerName, dueFrom, dueTo, status);
         list = limitList(list, limit);
@@ -178,6 +243,61 @@ public class ApiController {
         return ResponseEntity.ok(ok(list));
     }
 
+    // 수주 단건 조회.
+    @GetMapping("/api/orders/{orderId}")
+    public ResponseEntity<Map<String, Object>> orderDetail(@PathVariable("orderId") String orderId) {
+        Map<String, Object> item = findByKey(ensureOrderStore(), "orderId", orderId);
+        if (item == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(fail("E-404", "order not found"));
+        }
+        return ResponseEntity.ok(ok(item));
+    }
+
+    // 수주 등록.
+    @PostMapping("/api/orders")
+    public ResponseEntity<Map<String, Object>> createOrder(@RequestBody Map<String, Object> body) {
+        String orderNo = asString(body.get("orderNo"));
+        if (orderNo.isBlank()) {
+            return badRequest("E-0001", "orderNo required");
+        }
+        String orderId = "ORD-" + String.format("%03d", orderSeq.getAndIncrement());
+        Map<String, Object> item = new LinkedHashMap<>();
+        item.put("orderId", orderId);
+        item.put("orderNo", orderNo);
+        item.put("partnerName", asString(body.get("partnerName")));
+        item.put("dueDate", asString(body.get("dueDate")));
+        item.put("status", defaultStatus(asString(body.get("status")), "PLANNED"));
+        orderStore.add(item);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ok(item));
+    }
+
+    // 수주 수정.
+    @PutMapping("/api/orders/{orderId}")
+    public ResponseEntity<Map<String, Object>> updateOrder(
+            @PathVariable("orderId") String orderId,
+            @RequestBody Map<String, Object> body) {
+        Map<String, Object> item = findByKey(ensureOrderStore(), "orderId", orderId);
+        if (item == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(fail("E-404", "order not found"));
+        }
+        applyIfPresent(item, "orderNo", body);
+        applyIfPresent(item, "partnerName", body);
+        applyIfPresent(item, "dueDate", body);
+        if (body.containsKey("status")) {
+            item.put("status", defaultStatus(asString(body.get("status")), "PLANNED"));
+        }
+        return ResponseEntity.ok(ok(item));
+    }
+
+    // 수주 삭제.
+    @DeleteMapping("/api/orders/{orderId}")
+    public ResponseEntity<Map<String, Object>> deleteOrder(@PathVariable("orderId") String orderId) {
+        boolean removed = removeByKey(ensureOrderStore(), "orderId", orderId);
+        if (!removed) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(fail("E-404", "order not found"));
+        }
+        return ResponseEntity.ok(ok(Map.of("deleted", true)));
+    }
     // 작업 목록 조회.
     // 목적: 작업 화면에 필요한 기본 리스트를 제공한다.
     // 이유: 수주와 같은 방식으로 샘플 데이터로 먼저 UI를 연결한다.
@@ -206,18 +326,7 @@ public class ApiController {
         }
 
         // 샘플 파일이 없으면 1건 기본값을 만든다.
-        List<Map<String, Object>> list = sampleList("samples/jobs.json");
-        if (list == null || list.isEmpty()) {
-            list = new ArrayList<>();
-            Map<String, Object> item = new LinkedHashMap<>();
-            item.put("jobId", "JOB-001");
-            item.put("orderId", "ORD-001");
-            item.put("processName", "Cutting");
-            item.put("startAt", "2025-12-24T09:00:00");
-            item.put("endAt", "2025-12-24T12:00:00");
-            item.put("status", "DONE");
-            list.add(item);
-        }
+        List<Map<String, Object>> list = ensureJobStore();
         // 필터 조건이 있으면 샘플 데이터에서도 동일하게 적용한다.
         list = filterJobs(list, jobId, orderId, processName, from, to, status);
         list = limitList(list, limit);
@@ -225,6 +334,64 @@ public class ApiController {
         return ResponseEntity.ok(ok(list));
     }
 
+    // 작업 단건 조회.
+    @GetMapping("/api/jobs/{jobId}")
+    public ResponseEntity<Map<String, Object>> jobDetail(@PathVariable("jobId") String jobId) {
+        Map<String, Object> item = findByKey(ensureJobStore(), "jobId", jobId);
+        if (item == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(fail("E-404", "job not found"));
+        }
+        return ResponseEntity.ok(ok(item));
+    }
+
+    // 작업 등록.
+    @PostMapping("/api/jobs")
+    public ResponseEntity<Map<String, Object>> createJob(@RequestBody Map<String, Object> body) {
+        String orderId = asString(body.get("orderId"));
+        String processName = asString(body.get("processName"));
+        if (orderId.isBlank() || processName.isBlank()) {
+            return badRequest("E-0001", "orderId and processName required");
+        }
+        String jobId = "JOB-" + String.format("%03d", jobSeq.getAndIncrement());
+        Map<String, Object> item = new LinkedHashMap<>();
+        item.put("jobId", jobId);
+        item.put("orderId", orderId);
+        item.put("processName", processName);
+        item.put("startAt", asString(body.get("startAt")));
+        item.put("endAt", asString(body.get("endAt")));
+        item.put("status", defaultStatus(asString(body.get("status")), "PLANNED"));
+        jobStore.add(item);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ok(item));
+    }
+
+    // 작업 수정.
+    @PutMapping("/api/jobs/{jobId}")
+    public ResponseEntity<Map<String, Object>> updateJob(
+            @PathVariable("jobId") String jobId,
+            @RequestBody Map<String, Object> body) {
+        Map<String, Object> item = findByKey(ensureJobStore(), "jobId", jobId);
+        if (item == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(fail("E-404", "job not found"));
+        }
+        applyIfPresent(item, "orderId", body);
+        applyIfPresent(item, "processName", body);
+        applyIfPresent(item, "startAt", body);
+        applyIfPresent(item, "endAt", body);
+        if (body.containsKey("status")) {
+            item.put("status", defaultStatus(asString(body.get("status")), "PLANNED"));
+        }
+        return ResponseEntity.ok(ok(item));
+    }
+
+    // 작업 삭제.
+    @DeleteMapping("/api/jobs/{jobId}")
+    public ResponseEntity<Map<String, Object>> deleteJob(@PathVariable("jobId") String jobId) {
+        boolean removed = removeByKey(ensureJobStore(), "jobId", jobId);
+        if (!removed) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(fail("E-404", "job not found"));
+        }
+        return ResponseEntity.ok(ok(Map.of("deleted", true)));
+    }
     // KPI 목록 조회.
     // 목적: KPI 화면에서 그리드/차트에 사용할 기초 데이터를 제공한다.
     // 이유: KPI 화면 바인딩을 먼저 진행하기 위해 샘플 데이터가 필요하다.
@@ -247,22 +414,7 @@ public class ApiController {
             return badRequest("E-1003", "invalid date range");
         }
 
-        List<Map<String, Object>> list = sampleList("samples/kpi.json");
-        if (list == null || list.isEmpty()) {
-            list = new ArrayList<>();
-            Map<String, Object> item = new LinkedHashMap<>();
-            item.put("kpiId", "KPI-001");
-            item.put("name", "생산성");
-            item.put("targetValue", 100);
-            item.put("currentValue", 82);
-            item.put("progressRate", 0.82);
-            item.put("resultValue", 82);
-            item.put("unit", "%");
-            item.put("formula", "current/target*100");
-            item.put("remark", "샘플");
-            item.put("date", "2025-12-24");
-            list.add(item);
-        }
+        List<Map<String, Object>> list = ensureKpiStore();
         // 필터 조건이 있으면 샘플 데이터에서도 동일하게 적용한다.
         list = filterKpi(list, name, kpiId, from, to);
         list = limitList(list, limit);
@@ -270,6 +422,69 @@ public class ApiController {
         return ResponseEntity.ok(ok(list));
     }
 
+    // KPI 단건 조회.
+    @GetMapping("/api/kpi/{kpiId}")
+    public ResponseEntity<Map<String, Object>> kpiDetail(@PathVariable("kpiId") String kpiId) {
+        Map<String, Object> item = findByKey(ensureKpiStore(), "kpiId", kpiId);
+        if (item == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(fail("E-404", "kpi not found"));
+        }
+        return ResponseEntity.ok(ok(item));
+    }
+
+    // KPI 등록.
+    @PostMapping("/api/kpi")
+    public ResponseEntity<Map<String, Object>> createKpi(@RequestBody Map<String, Object> body) {
+        String name = asString(body.get("name"));
+        if (name.isBlank()) {
+            return badRequest("E-0001", "name required");
+        }
+        String kpiId = "KPI-" + String.format("%03d", kpiSeq.getAndIncrement());
+        Map<String, Object> item = new LinkedHashMap<>();
+        item.put("kpiId", kpiId);
+        item.put("name", name);
+        item.put("targetValue", body.get("targetValue"));
+        item.put("currentValue", body.get("currentValue"));
+        item.put("progressRate", body.get("progressRate"));
+        item.put("resultValue", body.get("resultValue"));
+        item.put("unit", asString(body.get("unit")));
+        item.put("formula", asString(body.get("formula")));
+        item.put("remark", asString(body.get("remark")));
+        item.put("date", asString(body.get("date")));
+        kpiStore.add(item);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ok(item));
+    }
+
+    // KPI 수정.
+    @PutMapping("/api/kpi/{kpiId}")
+    public ResponseEntity<Map<String, Object>> updateKpi(
+            @PathVariable("kpiId") String kpiId,
+            @RequestBody Map<String, Object> body) {
+        Map<String, Object> item = findByKey(ensureKpiStore(), "kpiId", kpiId);
+        if (item == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(fail("E-404", "kpi not found"));
+        }
+        applyIfPresent(item, "name", body);
+        applyIfPresent(item, "targetValue", body);
+        applyIfPresent(item, "currentValue", body);
+        applyIfPresent(item, "progressRate", body);
+        applyIfPresent(item, "resultValue", body);
+        applyIfPresent(item, "unit", body);
+        applyIfPresent(item, "formula", body);
+        applyIfPresent(item, "remark", body);
+        applyIfPresent(item, "date", body);
+        return ResponseEntity.ok(ok(item));
+    }
+
+    // KPI 삭제.
+    @DeleteMapping("/api/kpi/{kpiId}")
+    public ResponseEntity<Map<String, Object>> deleteKpi(@PathVariable("kpiId") String kpiId) {
+        boolean removed = removeByKey(ensureKpiStore(), "kpiId", kpiId);
+        if (!removed) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(fail("E-404", "kpi not found"));
+        }
+        return ResponseEntity.ok(ok(Map.of("deleted", true)));
+    }
     // KPI 추이 조회.
     // 목적: KPI 차트에서 기간별 추이를 보여주기 위한 데이터를 제공한다.
     // 이유: 차트 바인딩 검증은 별도의 시계열 데이터가 필요하기 때문이다.
@@ -334,6 +549,16 @@ public class ApiController {
         res.put("errorCode", errorCode);
         res.put("data", null);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+    }
+
+    // 공통 실패 응답 포맷(404 등).
+    private Map<String, Object> fail(String errorCode, String message) {
+        Map<String, Object> res = new LinkedHashMap<>();
+        res.put("result", "FAIL");
+        res.put("message", message);
+        res.put("errorCode", errorCode);
+        res.put("data", null);
+        return res;
     }
 
     // limit의 허용 범위를 검증한다.
@@ -449,6 +674,131 @@ public class ApiController {
             return list;
         }
         return new ArrayList<>(list.subList(0, limit));
+    }
+
+    // 장비 저장소 초기화.
+    private List<Map<String, Object>> ensureEquipmentStore() {
+        if (equipmentStore.isEmpty()) {
+            List<Map<String, Object>> list = sampleList("samples/equipments.json");
+            if (list == null || list.isEmpty()) {
+                list = new ArrayList<>();
+                Map<String, Object> item = new LinkedHashMap<>();
+                item.put("deviceId", "EQ-001");
+                item.put("name", "샘플 설비");
+                item.put("lastSeenAt", "2025-12-24T00:00:00");
+                item.put("status", "ACTIVE");
+                list.add(item);
+            }
+            equipmentStore.addAll(list);
+        }
+        return equipmentStore;
+    }
+
+    // 수주 저장소 초기화.
+    private List<Map<String, Object>> ensureOrderStore() {
+        if (orderStore.isEmpty()) {
+            List<Map<String, Object>> list = sampleList("samples/orders.json");
+            if (list == null || list.isEmpty()) {
+                list = new ArrayList<>();
+                Map<String, Object> item = new LinkedHashMap<>();
+                item.put("orderId", "ORD-001");
+                item.put("orderNo", "ORD-001");
+                item.put("partnerName", "샘플 거래처");
+                item.put("dueDate", "2025-12-31");
+                item.put("status", "PLANNED");
+                list.add(item);
+            }
+            orderStore.addAll(list);
+        }
+        return orderStore;
+    }
+
+    // 작업 저장소 초기화.
+    private List<Map<String, Object>> ensureJobStore() {
+        if (jobStore.isEmpty()) {
+            List<Map<String, Object>> list = sampleList("samples/jobs.json");
+            if (list == null || list.isEmpty()) {
+                list = new ArrayList<>();
+                Map<String, Object> item = new LinkedHashMap<>();
+                item.put("jobId", "JOB-001");
+                item.put("orderId", "ORD-001");
+                item.put("processName", "Cutting");
+                item.put("startAt", "2025-12-24T09:00:00");
+                item.put("endAt", "2025-12-24T12:00:00");
+                item.put("status", "DONE");
+                list.add(item);
+            }
+            jobStore.addAll(list);
+        }
+        return jobStore;
+    }
+
+    // KPI 저장소 초기화.
+    private List<Map<String, Object>> ensureKpiStore() {
+        if (kpiStore.isEmpty()) {
+            List<Map<String, Object>> list = sampleList("samples/kpi.json");
+            if (list == null || list.isEmpty()) {
+                list = new ArrayList<>();
+                Map<String, Object> item = new LinkedHashMap<>();
+                item.put("kpiId", "KPI-001");
+                item.put("name", "생산성");
+                item.put("targetValue", 100);
+                item.put("currentValue", 82);
+                item.put("progressRate", 0.82);
+                item.put("resultValue", 82);
+                item.put("unit", "%");
+                item.put("formula", "current/target*100");
+                item.put("remark", "샘플");
+                item.put("date", "2025-12-24");
+                list.add(item);
+            }
+            kpiStore.addAll(list);
+        }
+        return kpiStore;
+    }
+
+    // 단일 키 기준으로 항목을 찾는다.
+    private Map<String, Object> findByKey(List<Map<String, Object>> list, String key, String value) {
+        for (Map<String, Object> item : list) {
+            if (value.equals(asString(item.get(key)))) {
+                return item;
+            }
+        }
+        return null;
+    }
+
+    // 단일 키 기준으로 항목을 제거한다.
+    private boolean removeByKey(List<Map<String, Object>> list, String key, String value) {
+        Map<String, Object> target = null;
+        for (Map<String, Object> item : list) {
+            if (value.equals(asString(item.get(key)))) {
+                target = item;
+                break;
+            }
+        }
+        if (target == null) {
+            return false;
+        }
+        return list.remove(target);
+    }
+
+    // 요청 바디에 값이 있으면 기존 항목에 반영한다.
+    private void applyIfPresent(Map<String, Object> target, String key, Map<String, Object> body) {
+        if (!body.containsKey(key)) {
+            return;
+        }
+        Object value = body.get(key);
+        if (value != null && !asString(value).isBlank()) {
+            target.put(key, value);
+        }
+    }
+
+    // 상태 기본값을 보정한다.
+    private String defaultStatus(String value, String defaultValue) {
+        if (value == null || value.isBlank()) {
+            return defaultValue;
+        }
+        return value.toUpperCase();
     }
 
     // 공통 문자열 변환.
