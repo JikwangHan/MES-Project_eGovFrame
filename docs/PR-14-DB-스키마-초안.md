@@ -16,6 +16,12 @@
 - 생성 시각: DATETIME DEFAULT CURRENT_TIMESTAMP
 - 업데이트 시각: DATETIME DEFAULT CURRENT_TIMESTAMP
 
+## 기본값(확정)
+- 코드/상태: VARCHAR(32) 기본값 'UNKNOWN' 또는 도메인 기본값
+- 이름/명칭: VARCHAR(100)
+- 비고/메모: VARCHAR(200)
+- 원시 본문: LONGTEXT
+
 ## 테이블(초안)
 ### company
 - id (PK)
