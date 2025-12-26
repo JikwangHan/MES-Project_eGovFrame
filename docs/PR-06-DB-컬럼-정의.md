@@ -19,7 +19,8 @@
 - metric_key (NOT NULL)
 - metric_value (NOT NULL)
 - unit (NULL)
- - 유니크 제약: (company_id, device_id, timestamp, metric_key)
+- 유니크 제약: (company_id, device_id, timestamp, metric_key)
+- 인덱스: company_id, device_id, timestamp
 
 ## event_log
 - event_id (PK, NOT NULL)
@@ -28,6 +29,7 @@
 - event_type (NOT NULL)
 - message (NOT NULL)
 - created_at (NOT NULL)
+- 인덱스: company_id, device_id, created_at
 
 ## alarm
 - alarm_id (PK, NOT NULL)
@@ -36,6 +38,7 @@
 - level (NOT NULL)
 - message (NOT NULL)
 - created_at (NOT NULL)
+- 인덱스: company_id, device_id, created_at
 
 ## raw_ingest
 - raw_id (PK, NOT NULL)
@@ -43,3 +46,4 @@
 - device_id (FK, NULL)
 - received_at (NOT NULL)
 - payload (NOT NULL)
+- 인덱스: company_id, device_id, received_at
