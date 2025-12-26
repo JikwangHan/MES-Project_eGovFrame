@@ -26,6 +26,7 @@
 - unit (NULL)
 - 유니크 제약: (company_id, device_id, timestamp, metric_key)
 - 인덱스: company_id, device_id, timestamp
+- 인덱스 이름 규칙: idx_telemetry_company_device_time
 - 타입: telemetry_id=BIGINT, company_id=VARCHAR, device_id=VARCHAR, raw_id=BIGINT, timestamp=TIMESTAMP, metric_key=VARCHAR, metric_value=DECIMAL, unit=VARCHAR
 - 길이 기준: company_id=64, device_id=64, metric_key=64, unit=32, metric_value=DECIMAL(18,4)
 - 삭제 정책: 장비(equipment) 삭제 시 텔레메트리 삭제
@@ -38,6 +39,7 @@
 - message (NOT NULL)
 - created_at (NOT NULL)
 - 인덱스: company_id, device_id, created_at
+- 인덱스 이름 규칙: idx_event_company_device_time
 - 타입: event_id=BIGINT, company_id=VARCHAR, device_id=VARCHAR, event_type=VARCHAR, message=VARCHAR, created_at=TIMESTAMP
 - 길이 기준: company_id=64, device_id=64, event_type=64, message=255
 - 삭제 정책: 장비(equipment) 삭제 시 로그 삭제
@@ -50,6 +52,7 @@
 - message (NOT NULL)
 - created_at (NOT NULL)
 - 인덱스: company_id, device_id, created_at
+- 인덱스 이름 규칙: idx_alarm_company_device_time
 - 타입: alarm_id=BIGINT, company_id=VARCHAR, device_id=VARCHAR, level=VARCHAR, message=VARCHAR, created_at=TIMESTAMP
 - 길이 기준: company_id=64, device_id=64, level=32, message=255
 - 삭제 정책: 장비(equipment) 삭제 시 알람 삭제
@@ -61,6 +64,7 @@
 - received_at (NOT NULL)
 - payload (NOT NULL)
 - 인덱스: company_id, device_id, received_at
+- 인덱스 이름 규칙: idx_raw_company_device_time
 - 타입: raw_id=BIGINT, company_id=VARCHAR, device_id=VARCHAR, received_at=TIMESTAMP, payload=TEXT
 - 길이 기준: company_id=64, device_id=64
 - 삭제 정책: 회사(company) 삭제 시 raw_ingest 삭제
