@@ -105,3 +105,8 @@
   "errorCode": "KPI-400"
 }
 ```
+
+## 8) External Sync (MES -> External)
+- POST /api/external-sync
+- 설명: 외부기관 연계를 위한 전송 트리거
+- 응답: 200 OK
