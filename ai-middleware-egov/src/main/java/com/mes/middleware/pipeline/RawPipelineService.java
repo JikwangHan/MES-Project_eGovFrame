@@ -2,6 +2,7 @@ package com.mes.middleware.pipeline;
 
 import org.springframework.stereotype.Service;
 
+import com.mes.common.logging.PassFailLog;
 import com.mes.middleware.storage.NormalizedStore;
 import com.mes.middleware.storage.QuarantineStore;
 
@@ -21,9 +22,11 @@ public class RawPipelineService {
         ClassificationResult result = classify(payload == null ? "" : payload);
         if (result.confidence < 0.5) {
             quarantineStore.save(rawId, payload);
+            PassFailLog.skip("quarantine " + rawId);
             return;
         }
         normalizedStore.save(rawId, result);
+        PassFailLog.pass("normalized " + rawId);
     }
 
     // 목적: 데이터 형식을 추정한다.

@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 
@@ -26,6 +27,11 @@ public class NormalizedStore {
             Path file = dir.resolve(ts + "-" + rawId + ".json");
             String json = buildJson(rawId, result);
             Files.writeString(file, json, StandardCharsets.UTF_8);
+            // 누적 파일에 한 줄씩 저장해 후속 분석에 사용한다.
+            Path aggregated = dir.resolve("normalized.jsonl");
+            Files.write(aggregated, List.of(json), StandardCharsets.UTF_8,
+                    Files.exists(aggregated) ? java.nio.file.StandardOpenOption.APPEND
+                                             : java.nio.file.StandardOpenOption.CREATE);
         } catch (IOException ex) {
             // 정규화 저장 실패 시에도 업링크 처리는 유지한다.
         }
