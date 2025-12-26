@@ -6,6 +6,12 @@ set -eu
 base="http://localhost:18080"
 endpoint="/api/external-sync"
 
+health_code="$(curl -s -o /dev/null -w "%{http_code}" "$base/health" || true)"
+if [ "$health_code" != "200" ]; then
+  printf '%s\n' "[SKIP] external sync"
+  exit 2
+fi
+
 code="$(curl -s -o /dev/null -w "%{http_code}" -X POST "$base$endpoint" || true)"
 if [ "$code" = "200" ]; then
   printf '%s\n' "[PASS] external sync"

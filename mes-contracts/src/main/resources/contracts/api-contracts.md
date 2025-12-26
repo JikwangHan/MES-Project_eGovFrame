@@ -92,3 +92,11 @@
   ]
 }
 ```
+- 에러 예시:
+```json
+{
+  "result": "FAIL",
+  "message": "invalid request",
+  "errorCode": "KPI-400"
+}
+```

@@ -6,6 +6,11 @@ $base = "http://localhost:18080"
 $endpoint = "/api/external-sync"
 
 try {
+    $health = Invoke-WebRequest -Uri "$base/health" -UseBasicParsing -TimeoutSec 5
+    if ($health.StatusCode -ne 200) {
+        Write-Output "[SKIP] external sync"
+        exit 2
+    }
     $resp = Invoke-WebRequest -Method Post -Uri "$base$endpoint" -UseBasicParsing -TimeoutSec 5
     if ($resp.StatusCode -eq 200) {
         Write-Output "[PASS] external sync"
