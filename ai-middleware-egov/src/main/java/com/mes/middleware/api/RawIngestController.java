@@ -17,16 +17,25 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.mes.middleware.pipeline.RawPipelineService;
+
 @RestController
 public class RawIngestController {
     // 원본 데이터를 파일로 보관할 폴더명(상대 경로).
     // 이유: 외부 경로를 고정하지 않으면 운영 환경마다 경로가 달라져 관리가 어렵다.
     private static final String RAW_DIR = "data/raw";
 
+    private final RawPipelineService pipelineService;
+
+    public RawIngestController(RawPipelineService pipelineService) {
+        this.pipelineService = pipelineService;
+    }
+
     @PostMapping("/api/raw-ingest")
     public ResponseEntity<Map<String, Object>> rawIngest(@RequestBody String payload) {
         try {
             String id = storeRaw(payload == null ? "" : payload);
+            pipelineService.process(id, payload);
             Map<String, Object> data = new LinkedHashMap<>();
             data.put("id", id);
             return ResponseEntity.status(HttpStatus.CREATED).body(ok(data));
