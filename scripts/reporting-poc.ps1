@@ -11,5 +11,9 @@ New-Item -ItemType Directory -Path $outDir -Force | Out-Null
 # PoC 단계에서는 실제 파일 생성을 SKIP 처리한다.
 Remove-Item $outFile -ErrorAction SilentlyContinue
 Remove-Item $tmp -ErrorAction SilentlyContinue
+if (Test-Path $outFile) {
+    Write-Output "[PASS] reporting poc"
+    exit 0
+}
 Write-Output "[SKIP] reporting poc"
 exit 2

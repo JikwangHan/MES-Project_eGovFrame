@@ -11,5 +11,9 @@ mkdir -p "$out_dir"
 # PoC 단계에서는 실제 파일 생성을 SKIP 처리한다.
 rm -f "$out_file"
 rm -f "$tmp"
+if [ -f "$out_file" ]; then
+  printf '%s\n' "[PASS] reporting poc"
+  exit 0
+fi
 printf '%s\n' "[SKIP] reporting poc"
 exit 2
