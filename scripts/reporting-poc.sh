@@ -10,7 +10,9 @@ printf '%s\n' '{"kpiName":"생산성","targetValue":100,"currentValue":82,"progr
 mkdir -p "$out_dir"
 # PoC 단계에서는 실제 파일 생성을 SKIP 처리한다.
 rm -f "$out_file"
-rm -f "$tmp"
+if [ "${REPORTING_POC_KEEP_SAMPLE:-false}" != "true" ]; then
+  rm -f "$tmp"
+fi
 if [ -f "$out_file" ]; then
   printf '%s\n' "[PASS] reporting poc"
   exit 0

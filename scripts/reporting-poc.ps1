@@ -10,7 +10,10 @@ $data | Set-Content $tmp
 New-Item -ItemType Directory -Path $outDir -Force | Out-Null
 # PoC 단계에서는 실제 파일 생성을 SKIP 처리한다.
 Remove-Item $outFile -ErrorAction SilentlyContinue
-Remove-Item $tmp -ErrorAction SilentlyContinue
+$keepSample = $env:REPORTING_POC_KEEP_SAMPLE -eq "true"
+if (-not $keepSample) {
+    Remove-Item $tmp -ErrorAction SilentlyContinue
+}
 if (Test-Path $outFile) {
     Write-Output "[PASS] reporting poc"
     exit 0

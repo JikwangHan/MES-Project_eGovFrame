@@ -61,6 +61,8 @@
   - from (기간 시작)
   - to (기간 종료)
   - kpiId (선택)
+  - limit (1..100)
+  - offset (0..)
 - 응답: 200 OK
 - 필드(예시):
   - kpiId
