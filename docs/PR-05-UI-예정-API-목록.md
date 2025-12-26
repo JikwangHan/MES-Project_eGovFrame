@@ -46,6 +46,7 @@
 - 업무담당자: GET /api/admin/responsibles
 - 거래처: GET /api/admin/partners
 - 공장/창고: GET /api/admin/factories-warehouses
+- KPI 관리: GET /api/kpi
 
 ## 비고
 - 실제 계약은 PR-02 문서에 맞춰 확정한다.

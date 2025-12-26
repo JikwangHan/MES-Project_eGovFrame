@@ -39,7 +39,8 @@ public class UiRouteController {
         "/ui/admin/permissions",
         "/ui/admin/responsibles",
         "/ui/admin/partners",
-        "/ui/admin/factories-warehouses"
+        "/ui/admin/factories-warehouses",
+        "/ui/kpi"
     }, produces = MediaType.TEXT_HTML_VALUE)
     public String uiRoute(HttpServletRequest request) {
         String path = request.getRequestURI();

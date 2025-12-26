@@ -46,7 +46,8 @@ public final class UiMenu {
             new MenuItem("/ui/admin/permissions", "권한"),
             new MenuItem("/ui/admin/responsibles", "업무담당자"),
             new MenuItem("/ui/admin/partners", "거래처"),
-            new MenuItem("/ui/admin/factories-warehouses", "공장/창고")
+            new MenuItem("/ui/admin/factories-warehouses", "공장/창고"),
+            new MenuItem("/ui/kpi", "KPI 관리")
         ))
     );
 

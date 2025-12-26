@@ -62,6 +62,7 @@
 | SCR-0047 | 시스템관리 / 거래처 거래처 추가 | /admin/partners | 대기 | 문서 추출 |
 | SCR-0048 | 시스템관리 / 공장/창고 생산공장/창고 | /admin/factories-warehouses | 대기 | 문서 추출 |
 | SCR-0049 | 시스템관리 / 공장/창고 생산공장/창고 추가 | /admin/factories-warehouses | 대기 | 문서 추출 |
+| ADD-KPI-0001 | 시스템관리 / KPI 관리 | /kpi | 대기 | 추가 요구사항 |
 
 ## 상태 기준
 - 대기: 아직 스캐폴딩하지 않음

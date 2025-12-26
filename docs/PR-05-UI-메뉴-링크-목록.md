@@ -45,3 +45,4 @@
 - /ui/admin/responsibles
 - /ui/admin/partners
 - /ui/admin/factories-warehouses
+- /ui/kpi

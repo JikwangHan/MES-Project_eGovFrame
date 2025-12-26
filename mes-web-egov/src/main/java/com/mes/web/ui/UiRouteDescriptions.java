@@ -41,6 +41,7 @@ public final class UiRouteDescriptions {
         DESCRIPTIONS.put("/ui/admin/responsibles", "업무담당자: 담당자 매핑을 관리한다. 필수 입력: 업무코드, 담당자. 검증: 중복 여부. 데이터 소스(예정): 담당자 API.");
         DESCRIPTIONS.put("/ui/admin/partners", "거래처: 거래처 정보를 관리한다. 필수 입력: 거래처명. 검증: 중복 여부. 데이터 소스(예정): 거래처 API.");
         DESCRIPTIONS.put("/ui/admin/factories-warehouses", "공장/창고: 공장/창고 정보를 관리한다. 필수 입력: 명칭. 검증: 중복 여부. 데이터 소스(예정): 공장/창고 API.");
+        DESCRIPTIONS.put("/ui/kpi", "KPI 관리: KPI 정의/목표/산식/단위를 관리한다. 필수 입력: KPI명, 목표값. 검증: 중복 여부. 데이터 소스(예정): KPI API.");
     }
 
     private UiRouteDescriptions() {
