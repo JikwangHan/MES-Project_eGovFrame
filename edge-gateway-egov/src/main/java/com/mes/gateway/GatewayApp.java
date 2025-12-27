@@ -12,6 +12,9 @@ import java.nio.file.Path;
 import java.nio.charset.StandardCharsets;
 
 public class GatewayApp {
+    // 초보자 설명:
+    // - 실제 제조장비 대신 "가짜 장비" 역할을 하는 간단한 프로그램이다.
+    // - 특정 URL로 원본 데이터를 전송해 연결이 되는지 확인한다.
     // 목적: 장비 데이터를 MES로 전송하는 가장 단순한 시뮬레이터를 제공한다.
     // 이유: 실제 장비가 없어도 업링크 흐름을 검증할 수 있어야 한다.
     public static void main(String[] args) {
