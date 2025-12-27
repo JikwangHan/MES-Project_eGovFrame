@@ -2,5 +2,5 @@
     "java.compile.nullAnalysis.mode": "automatic",
     "maven.settingsFile": "scripts/maven-settings.egov.xml",
     "java.configuration.maven.userSettings": "scripts/maven-settings.egov.xml",
-    "java.configuration.updateBuildConfiguration": "interactive"
+    "java.configuration.updateBuildConfiguration": "automatic"
 }
