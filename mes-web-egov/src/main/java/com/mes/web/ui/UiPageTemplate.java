@@ -577,6 +577,9 @@ public final class UiPageTemplate {
             html.append("var banner=document.getElementById(\"status-banner-msg\");");
             html.append("if(banner){banner.textContent=text;}");
             html.append("}");
+            html.append("function nowStamp(){");
+            html.append("return (new Date()).toLocaleString();");
+            html.append("}");
             html.append("var syncHistory=[];");
             html.append("var syncHistoryRows=[];");
             html.append("function addSyncHistory(text){");
@@ -634,9 +637,9 @@ public final class UiPageTemplate {
             html.append("if((fromVal&&!toVal)||(!fromVal&&toVal)){");
             html.append("setSyncMessage([\"기간 시작/종료는 함께 입력해야 합니다.\"]);");
             html.append("setBannerMessage(\"외부기관 연계 요청에 실패했습니다.\");");
-            html.append("addSyncHistory((new Date()).toLocaleString()+\" - 실패: 기간 입력 누락\");");
+            html.append("addSyncHistory(nowStamp()+\" - 실패: 기간 입력 누락\");");
             html.append("addSyncHistoryRow({");
-            html.append("time:(new Date()).toLocaleString(),");
+            html.append("time:nowStamp(),");
             html.append("requestId:\"\",");
             html.append("status:\"FAILED\",");
             html.append("acceptedAt:\"\",");
@@ -647,9 +650,9 @@ public final class UiPageTemplate {
             html.append("if(!isValidDate(fromVal)||!isValidDate(toVal)){");
             html.append("setSyncMessage([\"날짜 형식이 올바르지 않습니다. YYYY-MM-DD로 입력하세요.\"]);");
             html.append("setBannerMessage(\"외부기관 연계 요청에 실패했습니다.\");");
-            html.append("addSyncHistory((new Date()).toLocaleString()+\" - 실패: 날짜 형식 오류\");");
+            html.append("addSyncHistory(nowStamp()+\" - 실패: 날짜 형식 오류\");");
             html.append("addSyncHistoryRow({");
-            html.append("time:(new Date()).toLocaleString(),");
+            html.append("time:nowStamp(),");
             html.append("requestId:\"\",");
             html.append("status:\"FAILED\",");
             html.append("acceptedAt:\"\",");
@@ -660,9 +663,9 @@ public final class UiPageTemplate {
             html.append("if(!isValidDateRange(fromVal,toVal)){");
             html.append("setSyncMessage([\"기간 시작이 종료보다 늦을 수 없습니다.\"]);");
             html.append("setBannerMessage(\"외부기관 연계 요청에 실패했습니다.\");");
-            html.append("addSyncHistory((new Date()).toLocaleString()+\" - 실패: 기간 역전\");");
+            html.append("addSyncHistory(nowStamp()+\" - 실패: 기간 역전\");");
             html.append("addSyncHistoryRow({");
-            html.append("time:(new Date()).toLocaleString(),");
+            html.append("time:nowStamp(),");
             html.append("requestId:\"\",");
             html.append("status:\"FAILED\",");
             html.append("acceptedAt:\"\",");
@@ -678,7 +681,7 @@ public final class UiPageTemplate {
             html.append("if(data.acceptedAt){parts.push(\"접수시간: \"+data.acceptedAt);}");
             html.append("setSyncMessage(parts);");
             html.append("setBannerMessage(\"외부기관 연계 요청이 접수되었습니다.\");");
-            html.append("var now=(new Date()).toLocaleString();");
+            html.append("var now=nowStamp();");
             html.append("var summary=parts.length>0?parts.join(\" | \"):\"연계 요청 완료\";");
             html.append("addSyncHistory(now+\" - \"+summary);");
             html.append("addSyncHistoryRow({");
@@ -691,7 +694,7 @@ public final class UiPageTemplate {
             html.append("},function(err){");
             html.append("setSyncMessage([resolveMessage(err)]);"); 
             html.append("setBannerMessage(\"외부기관 연계 요청에 실패했습니다.\");");
-            html.append("var now=(new Date()).toLocaleString();");
+            html.append("var now=nowStamp();");
             html.append("addSyncHistory(now+\" - 실패: \"+resolveMessage(err));");
             html.append("addSyncHistoryRow({");
             html.append("time:now,");
