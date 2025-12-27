@@ -41,6 +41,33 @@
   - lastSeenAt
   - status
 
+## 4-1) Equipment Detail
+- GET /api/equipments/{deviceId}
+- 응답: 200 OK
+
+## 4-2) Equipment Create
+- POST /api/equipments
+- 요청 필드(예시):
+  - deviceId (선택)
+  - name (필수)
+  - model (선택)
+  - vendor (선택)
+  - status (선택)
+- 응답: 201 Created
+
+## 4-3) Equipment Update
+- PUT /api/equipments/{deviceId}
+- 요청 필드(예시):
+  - name (선택)
+  - model (선택)
+  - vendor (선택)
+  - status (선택)
+- 응답: 200 OK
+
+## 4-4) Equipment Delete
+- DELETE /api/equipments/{deviceId}
+- 응답: 200 OK
+
 ## 5) Equipment Telemetry
 - GET /api/equipments/{deviceId}/telemetry
 - 쿼리:
@@ -74,6 +101,7 @@
   - unit
   - formula
   - remark
+  - date
 - 응답 예시:
 ```json
 {
@@ -106,6 +134,38 @@
 }
 ```
 
+## 7-1) KPI Detail
+- GET /api/kpi/{kpiId}
+- 응답: 200 OK
+
+## 7-2) KPI Create
+- POST /api/kpi
+- 요청 필드(예시):
+  - name (필수)
+  - targetValue (선택)
+  - currentValue (선택)
+  - unit (선택)
+  - formula (선택)
+  - remark (선택)
+  - date (선택, YYYY-MM-DD)
+- 응답: 201 Created
+
+## 7-3) KPI Update
+- PUT /api/kpi/{kpiId}
+- 요청 필드(예시):
+  - name (선택)
+  - targetValue (선택)
+  - currentValue (선택)
+  - unit (선택)
+  - formula (선택)
+  - remark (선택)
+  - date (선택, YYYY-MM-DD)
+- 응답: 200 OK
+
+## 7-4) KPI Delete
+- DELETE /api/kpi/{kpiId}
+- 응답: 200 OK
+
 ## 8) KPI Trend
 - GET /api/kpi/trend
 - 쿼리:
@@ -133,11 +193,44 @@
 - 응답: 200 OK
 - 필드(예시):
   - orderId
+  - orderNo
   - productCode
   - productName
   - quantity
   - dueDate
   - status
+
+## 9-1) Order Detail
+- GET /api/orders/{orderId}
+- 응답: 200 OK
+
+## 9-2) Order Create
+- POST /api/orders
+- 요청 필드(예시):
+  - orderNo (필수)
+  - productCode (선택)
+  - productName (선택)
+  - quantity (선택)
+  - partnerName (선택)
+  - dueDate (선택, YYYY-MM-DD)
+  - status (선택)
+- 응답: 201 Created
+
+## 9-3) Order Update
+- PUT /api/orders/{orderId}
+- 요청 필드(예시):
+  - orderNo (선택)
+  - productCode (선택)
+  - productName (선택)
+  - quantity (선택)
+  - partnerName (선택)
+  - dueDate (선택, YYYY-MM-DD)
+  - status (선택)
+- 응답: 200 OK
+
+## 9-4) Order Delete
+- DELETE /api/orders/{orderId}
+- 응답: 200 OK
 
 ## 10) Jobs
 - GET /api/jobs
@@ -154,14 +247,55 @@
   - jobId
   - orderId
   - processName
+  - equipmentId
+  - operatorName
   - startAt
   - endAt
   - status
 
+## 10-1) Job Detail
+- GET /api/jobs/{jobId}
+- 응답: 200 OK
+
+## 10-2) Job Create
+- POST /api/jobs
+- 요청 필드(예시):
+  - orderId (필수)
+  - processName (필수)
+  - startAt (선택)
+  - endAt (선택)
+  - status (선택)
+- 응답: 201 Created
+
+## 10-3) Job Update
+- PUT /api/jobs/{jobId}
+- 요청 필드(예시):
+  - orderId (선택)
+  - processName (선택)
+  - startAt (선택)
+  - endAt (선택)
+  - status (선택)
+- 응답: 200 OK
+
+## 10-4) Job Delete
+- DELETE /api/jobs/{jobId}
+- 응답: 200 OK
+
 ## 11) External Sync (MES -> External)
 - POST /api/external-sync
 - 설명: 외부기관 연계를 위한 전송 트리거
+- 요청 필드(예시):
+  - companyId (선택)
+  - from (선택, YYYY-MM-DD)
+  - to (선택, YYYY-MM-DD)
+- 규칙:
+  - from 또는 to 중 하나만 보내는 것은 허용하지 않는다.
+  - 둘 다 비어 있으면 전체 기간으로 간주한다.
 - 응답: 200 OK
+- 응답 필드(예시):
+  - requestId
+  - status
+  - acceptedAt
 
 ## 공통 검증 규칙(초안)
 - 날짜 형식: YYYY-MM-DD, 월/일 범위 유효성 포함 (형식 오류 시 400)
@@ -191,3 +325,4 @@
 - E-1001: invalid date format
 - E-1002: invalid status
 - E-1003: invalid date range
+- E-1004: invalid numeric value

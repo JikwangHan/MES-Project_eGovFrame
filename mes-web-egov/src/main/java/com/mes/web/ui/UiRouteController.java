@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class UiRouteController {
+    // 초보자 설명:
+    // - 여러 화면 경로(/ui/...)를 하나의 템플릿으로 처리한다.
+    // - 화면이 많아도 "설명 + 공통 레이아웃"은 동일하게 유지된다.
     // 목적: UI 문서에 정의된 화면 경로를 우선 라우팅만 제공한다.
     // 이유: 데이터 바인딩 전 단계에서 화면 접근 가능 여부를 스모크로 확인하기 위함이다.
     // 입력: 브라우저가 요청한 경로.

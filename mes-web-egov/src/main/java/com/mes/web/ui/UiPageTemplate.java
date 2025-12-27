@@ -9,6 +9,11 @@ public final class UiPageTemplate {
     // 이유: 실제 템플릿 엔진 도입 전에도 일관된 레이아웃과 메뉴를 확인하기 위함이다.
     // 입력: title(브라우저 탭 제목), heading(페이지 제목), message(설명), currentPath(현재 화면 경로).
     // 출력: 완성된 HTML 문자열.
+    //
+    // 초보자 설명:
+    // - 아직 템플릿 엔진(타임리프 등)을 쓰지 않기 때문에,
+    //   문자열을 직접 이어붙여 화면을 만든다.
+    // - 이 방식은 단순하지만 빠르게 화면 골격을 확인할 수 있다.
     public static String render(String title, String heading, String message, String currentPath) {
         StringBuilder html = new StringBuilder();
         // HTML 문서 시작부를 만든다.
@@ -32,6 +37,9 @@ public final class UiPageTemplate {
         html.append(".chart{display:flex;align-items:flex-end;gap:6px;height:180px;border:1px solid #e5e7eb;border-radius:6px;padding:8px;}");
         html.append(".chart .bar{width:16px;background:#60a5fa;border-radius:4px 4px 0 0;}");
         html.append(".chart .bar.target{background:#34d399;}");
+        html.append(".action-bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}");
+        html.append(".btn{padding:6px 10px;border-radius:6px;border:1px solid #cbd5e1;background:#f8fafc;cursor:pointer;}");
+        html.append(".btn.primary{background:#2563eb;color:#fff;border-color:#2563eb;}");
         html.append("</style>");
         html.append("</head>");
         html.append("<body>");
@@ -61,9 +69,9 @@ public final class UiPageTemplate {
         html.append("<div class=\"box\">요약 카드 3(데이터 준비 중)</div>");
         html.append("</div>");
         // 상단 공지/상태 배너 영역.
-        html.append("<div class=\"card\" style=\"margin-bottom:16px;background:#fef3c7;\">");
-        html.append("<strong>알림/상태 배너(예정)</strong>");
-        html.append("<p>시스템 상태/주의 메시지는 후속 단계에서 적용합니다.</p>");
+        html.append("<div class=\"card\" id=\"status-banner\" style=\"margin-bottom:16px;background:#fef3c7;\">");
+        html.append("<strong>알림/상태 배너</strong>");
+        html.append("<p id=\"status-banner-msg\">시스템 상태/주의 메시지는 후속 단계에서 적용합니다.</p>");
         html.append("</div>");
         // 현재 화면 설명을 노출한다.
         html.append("<div class=\"card\" style=\"margin-bottom:16px;\">");
@@ -83,8 +91,76 @@ public final class UiPageTemplate {
         // 화면 액션 버튼 자리표시자.
         html.append("<div class=\"card\" style=\"margin-bottom:16px;\">");
         html.append("<strong>액션 버튼 영역(예정)</strong>");
-        html.append("<p>등록/수정/삭제 버튼은 후속 단계에서 적용합니다.</p>");
+        html.append("<div class=\"action-bar\">");
+        html.append("<button class=\"btn primary\">등록</button>");
+        html.append("<button class=\"btn\">수정</button>");
+        html.append("<button class=\"btn\">삭제</button>");
+        html.append("<button class=\"btn\" id=\"ui-report\">레포팅</button>");
+        html.append("<button class=\"btn\" id=\"ui-external-sync\">외부기관 연계</button>");
         html.append("</div>");
+        html.append("<div id=\"report-msg\" style=\"margin-top:8px;color:#0f172a;\"></div>");
+        html.append("<div id=\"sync-msg\" style=\"margin-top:6px;color:#0f172a;\"></div>");
+        // 외부기관 연계는 스펙이 확정되기 전이라 기본 규칙을 안내한다.
+        // 초보자 설명:
+        // - from/to 날짜는 함께 제공해야 한다.
+        // - 둘 다 비어 있으면 "전체 기간"으로 간주된다.
+        html.append("<div style=\"margin-top:6px;color:#475569;font-size:12px;\">");
+        html.append("외부기관 연계는 기간(from/to)을 함께 입력해야 합니다. 둘 다 비어 있으면 전체 기간으로 처리됩니다.");
+        html.append("</div>");
+        // 외부기관 연계 요청 이력 표시 영역(간단 로그).
+        // 목적: 사용자가 최근 요청 결과를 빠르게 확인하게 한다.
+        html.append("<div style=\"margin-top:10px;\">");
+        html.append("<strong style=\"font-size:13px;\">연계 요청 이력(최신 5건)</strong>");
+        html.append("<ul id=\"sync-history\" style=\"margin-top:6px;padding-left:16px;color:#0f172a;\"></ul>");
+        html.append("<table style=\"width:100%;border-collapse:collapse;margin-top:8px;\">");
+        html.append("<thead><tr>");
+        html.append("<th style=\"border-bottom:1px solid #ddd;text-align:left;\">시간</th>");
+        html.append("<th style=\"border-bottom:1px solid #ddd;text-align:left;\">요청ID</th>");
+        html.append("<th style=\"border-bottom:1px solid #ddd;text-align:left;\">상태</th>");
+        html.append("<th style=\"border-bottom:1px solid #ddd;text-align:left;\">접수시간</th>");
+        html.append("<th style=\"border-bottom:1px solid #ddd;text-align:left;\">메시지</th>");
+        html.append("</tr></thead>");
+        html.append("<tbody id=\"sync-history-body\">");
+        html.append("<tr><td colspan=\"5\" style=\"padding:4px 0;\">이력이 없습니다.</td></tr>");
+        html.append("</tbody>");
+        html.append("</table>");
+        html.append("</div>");
+        html.append("</div>");
+        if ("/ui/equipment".equals(currentPath)) {
+            // 설비 등록 화면에서 기본 등록 폼을 제공한다.
+            // 초보자 설명:
+            // - 이 폼은 "등록 버튼"을 눌렀을 때 API를 호출한다.
+            // - 입력값이 비어있거나 잘못되면 화면에서 바로 경고한다.
+            html.append("<div class=\"card\" style=\"margin-bottom:16px;\">");
+            html.append("<strong>설비 등록(초안)</strong>");
+            html.append("<div style=\"display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;\">");
+            html.append("<input id=\"equip-device\" placeholder=\"장비 ID(선택)\" style=\"padding:6px;\" />");
+            html.append("<input id=\"equip-name\" placeholder=\"장비명(필수)\" style=\"padding:6px;\" />");
+            html.append("<input id=\"equip-model\" placeholder=\"모델\" style=\"padding:6px;\" />");
+            html.append("<input id=\"equip-vendor\" placeholder=\"제조사\" style=\"padding:6px;\" />");
+            html.append("<input id=\"equip-status\" placeholder=\"상태(예: ACTIVE)\" style=\"padding:6px;\" />");
+            html.append("<button id=\"equip-create\" style=\"padding:6px 10px;\">등록</button>");
+            html.append("<button id=\"equip-refresh\" style=\"padding:6px 10px;\">새로고침</button>");
+            html.append("</div>");
+            html.append("<div id=\"equip-warning\" style=\"margin-top:8px;color:#b91c1c;\"></div>");
+            html.append("<div id=\"equip-result\" style=\"margin-top:8px;color:#065f46;\"></div>");
+            html.append("</div>");
+            html.append("<div class=\"card\" style=\"margin-bottom:16px;\">");
+            html.append("<strong>설비 목록(임시)</strong>");
+            html.append("<table style=\"width:100%;border-collapse:collapse;margin-top:8px;\">");
+            html.append("<thead><tr>");
+            html.append("<th style=\"border-bottom:1px solid #ddd;text-align:left;\">장비ID</th>");
+            html.append("<th style=\"border-bottom:1px solid #ddd;text-align:left;\">장비명</th>");
+            html.append("<th style=\"border-bottom:1px solid #ddd;text-align:left;\">모델</th>");
+            html.append("<th style=\"border-bottom:1px solid #ddd;text-align:left;\">제조사</th>");
+            html.append("<th style=\"border-bottom:1px solid #ddd;text-align:left;\">상태</th>");
+            html.append("</tr></thead>");
+            html.append("<tbody id=\"equip-body\">");
+            html.append("<tr><td colspan=\"5\" style=\"padding:4px 0;\">데이터 로딩 중...</td></tr>");
+            html.append("</tbody>");
+            html.append("</table>");
+            html.append("</div>");
+        }
         if ("/ui/kpi".equals(currentPath)) {
             // KPI 전용 영역: 요구사항에 맞춘 구성요소(그리드/차트/레포팅) 자리표시자.
             html.append("<div class=\"card\" style=\"margin-bottom:16px;\">");
@@ -106,6 +182,22 @@ public final class UiPageTemplate {
             html.append("<p style=\"margin-top:8px;color:#6b7280;\">날짜는 YYYY-MM-DD 형식으로 입력합니다. 비워두면 전체 조회됩니다.</p>");
             html.append("<p style=\"margin-top:4px;color:#6b7280;\">모든 필터가 비어 있으면 전체 조회합니다.</p>");
             html.append("<div id=\"kpi-summary\" style=\"margin-top:6px;color:#6b7280;\"></div>");
+            html.append("</div>");
+            // 초보자 설명:
+            // - KPI 등록은 "KPI명"이 필수이며 숫자 값은 숫자만 허용한다.
+            // - 등록 후 목록을 다시 불러와 최신 상태를 보여준다.
+            html.append("<div class=\"card\" style=\"margin-bottom:16px;\">");
+            html.append("<strong>KPI 등록(초안)</strong>");
+            html.append("<div style=\"display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;\">");
+            html.append("<input id=\"kpi-create-name\" placeholder=\"KPI명(필수)\" style=\"padding:6px;\" />");
+            html.append("<input id=\"kpi-create-target\" placeholder=\"목표값\" style=\"padding:6px;\" />");
+            html.append("<input id=\"kpi-create-current\" placeholder=\"현재값\" style=\"padding:6px;\" />");
+            html.append("<input id=\"kpi-create-unit\" placeholder=\"단위\" style=\"padding:6px;\" />");
+            html.append("<input id=\"kpi-create-formula\" placeholder=\"산식\" style=\"padding:6px;\" />");
+            html.append("<button id=\"kpi-create\" style=\"padding:6px 10px;\">등록</button>");
+            html.append("</div>");
+            html.append("<div id=\"kpi-create-warning\" style=\"margin-top:8px;color:#b91c1c;\"></div>");
+            html.append("<div id=\"kpi-create-result\" style=\"margin-top:8px;color:#065f46;\"></div>");
             html.append("</div>");
             html.append("<div class=\"card\" style=\"margin-bottom:16px;\">");
             html.append("<strong>KPI 차트 영역(예정)</strong>");
@@ -167,6 +259,21 @@ public final class UiPageTemplate {
             html.append("<p style=\"margin-top:4px;color:#6b7280;\">모든 필터가 비어 있으면 전체 조회합니다.</p>");
             html.append("<div id=\"order-summary\" style=\"margin-top:6px;color:#6b7280;\"></div>");
             html.append("</div>");
+            // 초보자 설명:
+            // - 아래 "수주 등록" 폼은 API에 POST 요청을 보내 신규 수주를 만든다.
+            // - 등록 후 목록을 다시 불러와 최신 상태를 보여준다.
+            html.append("<div class=\"card\" style=\"margin-bottom:16px;\">");
+            html.append("<strong>수주 등록(초안)</strong>");
+            html.append("<div style=\"display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;\">");
+            html.append("<input id=\"order-create-no\" placeholder=\"수주번호(필수)\" style=\"padding:6px;\" />");
+            html.append("<input id=\"order-create-partner\" placeholder=\"거래처명\" style=\"padding:6px;\" />");
+            html.append("<input id=\"order-create-due\" placeholder=\"납기일(YYYY-MM-DD)\" style=\"padding:6px;\" />");
+            html.append("<input id=\"order-create-status\" placeholder=\"상태(PLANNED/IN_PROGRESS/DONE)\" style=\"padding:6px;\" />");
+            html.append("<button id=\"order-create\" style=\"padding:6px 10px;\">등록</button>");
+            html.append("</div>");
+            html.append("<div id=\"order-create-warning\" style=\"margin-top:8px;color:#b91c1c;\"></div>");
+            html.append("<div id=\"order-create-result\" style=\"margin-top:8px;color:#065f46;\"></div>");
+            html.append("</div>");
             html.append("<div class=\"card\" style=\"margin-bottom:16px;\">");
             html.append("<strong>수주 샘플 리스트(임시)</strong>");
             html.append("<table style=\"width:100%;border-collapse:collapse;margin-top:8px;\">");
@@ -203,6 +310,22 @@ public final class UiPageTemplate {
             html.append("<p style=\"margin-top:4px;color:#6b7280;\">모든 필터가 비어 있으면 전체 조회합니다.</p>");
             html.append("<div id=\"job-summary\" style=\"margin-top:6px;color:#6b7280;\"></div>");
             html.append("</div>");
+            // 초보자 설명:
+            // - "작업 등록"은 수주번호와 공정명을 필수로 받는다.
+            // - 입력값이 잘못되면 서버 호출 전에 바로 안내한다.
+            html.append("<div class=\"card\" style=\"margin-bottom:16px;\">");
+            html.append("<strong>작업 등록(초안)</strong>");
+            html.append("<div style=\"display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;\">");
+            html.append("<input id=\"job-create-order\" placeholder=\"수주번호(필수)\" style=\"padding:6px;\" />");
+            html.append("<input id=\"job-create-process\" placeholder=\"공정명(필수)\" style=\"padding:6px;\" />");
+            html.append("<input id=\"job-create-start\" placeholder=\"시작(YYYY-MM-DDTHH:MM:SS)\" style=\"padding:6px;\" />");
+            html.append("<input id=\"job-create-end\" placeholder=\"종료(YYYY-MM-DDTHH:MM:SS)\" style=\"padding:6px;\" />");
+            html.append("<input id=\"job-create-status\" placeholder=\"상태(PLANNED/IN_PROGRESS/DONE)\" style=\"padding:6px;\" />");
+            html.append("<button id=\"job-create\" style=\"padding:6px 10px;\">등록</button>");
+            html.append("</div>");
+            html.append("<div id=\"job-create-warning\" style=\"margin-top:8px;color:#b91c1c;\"></div>");
+            html.append("<div id=\"job-create-result\" style=\"margin-top:8px;color:#065f46;\"></div>");
+            html.append("</div>");
             html.append("<div class=\"card\" style=\"margin-bottom:16px;\">");
             html.append("<strong>작업 샘플 리스트(임시)</strong>");
             html.append("<table style=\"width:100%;border-collapse:collapse;margin-top:8px;\">");
@@ -220,9 +343,13 @@ public final class UiPageTemplate {
             html.append("</table>");
             html.append("</div>");
         }
-        if ("/ui/kpi".equals(currentPath) || "/ui/orders".equals(currentPath) || "/ui/jobs".equals(currentPath)) {
+        if ("/ui/kpi".equals(currentPath) || "/ui/orders".equals(currentPath)
+            || "/ui/jobs".equals(currentPath) || "/ui/equipment".equals(currentPath)) {
             // 목적: 화면에서 API 샘플 데이터를 가져와 표 형태로 표시한다.
             // 이유: 실제 DB/차트 연동 전에 데이터 흐름을 검증하기 위함이다.
+            // 초보자 설명:
+            // - 아래 스크립트는 "조회 버튼 클릭 → API 호출 → 표 갱신" 흐름을 수행한다.
+            // - 아직 복잡한 프레임워크를 쓰지 않고, 가장 단순한 방식으로 동작시킨다.
             html.append("<script>");
             html.append("(function(){");
             html.append("function fillTable(bodyId, rows, columns){");
@@ -281,6 +408,15 @@ public final class UiPageTemplate {
             html.append("if(onError){onError(err);}");
             html.append("});");
             html.append("}");
+            html.append("function postJson(url, payload, cb, onError){");
+            html.append("fetch(url,{method:\"POST\",headers:{\"Content-Type\":\"application/json\"},body:JSON.stringify(payload||{})})");
+            html.append(".then(function(res){");
+            html.append("if(!res.ok){return res.json().then(function(data){throw data;});}");
+            html.append("return res.json();");
+            html.append("}).then(cb).catch(function(err){");
+            html.append("if(onError){onError(err);}");
+            html.append("});");
+            html.append("}");
             html.append("function buildQuery(params){");
             html.append("var query=[];");
             html.append("Object.keys(params).forEach(function(key){");
@@ -292,9 +428,12 @@ public final class UiPageTemplate {
             html.append("function resolveMessage(err){");
             html.append("if(!err){return \"요청 오류\";}");
             html.append("var code=err.errorCode||\"\";");
+            html.append("if(code===\"E-0001\"){return \"필수 입력값이 누락되었습니다. 입력값을 확인하세요.\";}");
             html.append("if(code===\"E-1001\"){return \"날짜 형식 또는 범위가 올바르지 않습니다.\";}");
             html.append("if(code===\"E-1002\"){return \"상태 값이 올바르지 않습니다.\";}");
             html.append("if(code===\"E-1003\"){return \"기간 시작이 종료보다 늦을 수 없습니다.\";}");
+            html.append("if(code===\"E-1004\"){return \"숫자 형식이 올바르지 않습니다.\";}");
+            html.append("if(code===\"E-404\"){return \"대상을 찾을 수 없습니다. 다시 확인해 주세요.\";}");
             html.append("return err.message||\"요청 오류\";");
             html.append("}");
             html.append("function setWarning(id, err){");
@@ -428,6 +567,184 @@ public final class UiPageTemplate {
             html.append("}");
             html.append("return \"\";");
             html.append("}");
+            html.append("function setSyncMessage(parts){");
+            html.append("var el=document.getElementById(\"sync-msg\");");
+            html.append("if(!el){return;}");
+            html.append("if(parts&&parts.length>0){el.textContent=parts.join(\" | \");return;}");
+            html.append("el.textContent=\"연계 요청 완료\";");
+            html.append("}");
+            html.append("function setBannerMessage(text){");
+            html.append("var banner=document.getElementById(\"status-banner-msg\");");
+            html.append("if(banner){banner.textContent=text;}");
+            html.append("}");
+            html.append("var syncHistory=[];");
+            html.append("var syncHistoryRows=[];");
+            html.append("function addSyncHistory(text){");
+            html.append("if(!text){return;}");
+            html.append("syncHistory.unshift(text);");
+            html.append("if(syncHistory.length>5){syncHistory=syncHistory.slice(0,5);}");
+            html.append("var list=document.getElementById(\"sync-history\");");
+            html.append("if(!list){return;}");
+            html.append("list.innerHTML=\"\";");
+            html.append("for(var i=0;i<syncHistory.length;i++){");
+            html.append("var li=document.createElement(\"li\");");
+            html.append("li.textContent=syncHistory[i];");
+            html.append("list.appendChild(li);");
+            html.append("}");
+            html.append("}");
+            html.append("function addSyncHistoryRow(row){");
+            html.append("if(!row){return;}");
+            html.append("syncHistoryRows.unshift(row);");
+            html.append("if(syncHistoryRows.length>5){syncHistoryRows=syncHistoryRows.slice(0,5);}");
+            html.append("var body=document.getElementById(\"sync-history-body\");");
+            html.append("if(!body){return;}");
+            html.append("body.innerHTML=\"\";");
+            html.append("for(var i=0;i<syncHistoryRows.length;i++){");
+            html.append("var r=syncHistoryRows[i];");
+            html.append("var tr=document.createElement(\"tr\");");
+            html.append("function td(text){");
+            html.append("var cell=document.createElement(\"td\");");
+            html.append("cell.style.padding=\"4px 0\";");
+            html.append("cell.textContent=text||\"\";");
+            html.append("return cell;");
+            html.append("}");
+            html.append("tr.appendChild(td(r.time));");
+            html.append("tr.appendChild(td(r.requestId));");
+            html.append("tr.appendChild(td(r.status));");
+            html.append("tr.appendChild(td(r.acceptedAt));");
+            html.append("tr.appendChild(td(r.message));");
+            html.append("body.appendChild(tr);");
+            html.append("}");
+            html.append("}");
+            html.append("var reportBtn=document.getElementById(\"ui-report\");");
+            html.append("if(reportBtn){");
+            html.append("reportBtn.addEventListener(\"click\",function(){");
+            html.append("var el=document.getElementById(\"report-msg\");");
+            html.append("if(el){el.textContent=\"레포팅 기능은 후속 단계에서 파일 다운로드로 연결됩니다.\";}");
+            html.append("});");
+            html.append("}");
+            html.append("var syncBtn=document.getElementById(\"ui-external-sync\");");
+            html.append("if(syncBtn){");
+            html.append("syncBtn.addEventListener(\"click\",function(){");
+            html.append("var fromEl=document.getElementById(\"order-from\")||document.getElementById(\"kpi-from\");");
+            html.append("var toEl=document.getElementById(\"order-to\")||document.getElementById(\"kpi-to\");");
+            html.append("var payload={from:fromEl?fromEl.value:\"\",to:toEl?toEl.value:\"\"};");
+            html.append("var fromVal=payload.from||\"\";");
+            html.append("var toVal=payload.to||\"\";");
+            html.append("if((fromVal&&!toVal)||(!fromVal&&toVal)){");
+            html.append("setSyncMessage([\"기간 시작/종료는 함께 입력해야 합니다.\"]);");
+            html.append("setBannerMessage(\"외부기관 연계 요청에 실패했습니다.\");");
+            html.append("addSyncHistory((new Date()).toLocaleString()+\" - 실패: 기간 입력 누락\");");
+            html.append("addSyncHistoryRow({");
+            html.append("time:(new Date()).toLocaleString(),");
+            html.append("requestId:\"\",");
+            html.append("status:\"FAILED\",");
+            html.append("acceptedAt:\"\",");
+            html.append("message:\"기간 시작/종료는 함께 입력해야 합니다.\"");
+            html.append("});");
+            html.append("return;");
+            html.append("}");
+            html.append("if(!isValidDate(fromVal)||!isValidDate(toVal)){");
+            html.append("setSyncMessage([\"날짜 형식이 올바르지 않습니다. YYYY-MM-DD로 입력하세요.\"]);");
+            html.append("setBannerMessage(\"외부기관 연계 요청에 실패했습니다.\");");
+            html.append("addSyncHistory((new Date()).toLocaleString()+\" - 실패: 날짜 형식 오류\");");
+            html.append("addSyncHistoryRow({");
+            html.append("time:(new Date()).toLocaleString(),");
+            html.append("requestId:\"\",");
+            html.append("status:\"FAILED\",");
+            html.append("acceptedAt:\"\",");
+            html.append("message:\"날짜 형식이 올바르지 않습니다.\"");
+            html.append("});");
+            html.append("return;");
+            html.append("}");
+            html.append("if(!isValidDateRange(fromVal,toVal)){");
+            html.append("setSyncMessage([\"기간 시작이 종료보다 늦을 수 없습니다.\"]);");
+            html.append("setBannerMessage(\"외부기관 연계 요청에 실패했습니다.\");");
+            html.append("addSyncHistory((new Date()).toLocaleString()+\" - 실패: 기간 역전\");");
+            html.append("addSyncHistoryRow({");
+            html.append("time:(new Date()).toLocaleString(),");
+            html.append("requestId:\"\",");
+            html.append("status:\"FAILED\",");
+            html.append("acceptedAt:\"\",");
+            html.append("message:\"기간 시작이 종료보다 늦을 수 없습니다.\"");
+            html.append("});");
+            html.append("return;");
+            html.append("}");
+            html.append("postJson(\"/api/external-sync\",payload,function(res){");
+            html.append("var data=res&&res.data?res.data:{};");
+            html.append("var parts=[];");
+            html.append("if(data.requestId){parts.push(\"요청ID: \"+data.requestId);}");
+            html.append("if(data.status){parts.push(\"상태: \"+data.status);}");
+            html.append("if(data.acceptedAt){parts.push(\"접수시간: \"+data.acceptedAt);}");
+            html.append("setSyncMessage(parts);");
+            html.append("setBannerMessage(\"외부기관 연계 요청이 접수되었습니다.\");");
+            html.append("var now=(new Date()).toLocaleString();");
+            html.append("var summary=parts.length>0?parts.join(\" | \"):\"연계 요청 완료\";");
+            html.append("addSyncHistory(now+\" - \"+summary);");
+            html.append("addSyncHistoryRow({");
+            html.append("time:now,");
+            html.append("requestId:data.requestId||\"\",");
+            html.append("status:data.status||\"\",");
+            html.append("acceptedAt:data.acceptedAt||\"\",");
+            html.append("message:\"접수 완료\"");
+            html.append("});");
+            html.append("},function(err){");
+            html.append("setSyncMessage([resolveMessage(err)]);"); 
+            html.append("setBannerMessage(\"외부기관 연계 요청에 실패했습니다.\");");
+            html.append("var now=(new Date()).toLocaleString();");
+            html.append("addSyncHistory(now+\" - 실패: \"+resolveMessage(err));");
+            html.append("addSyncHistoryRow({");
+            html.append("time:now,");
+            html.append("requestId:\"\",");
+            html.append("status:\"FAILED\",");
+            html.append("acceptedAt:\"\",");
+            html.append("message:resolveMessage(err)");
+            html.append("});");
+            html.append("});");
+            html.append("});");
+            html.append("}");
+            html.append("if(document.getElementById(\"equip-body\")){");
+            html.append("fetchJson(\"/api/equipments\",function(res){");
+            html.append("fillTable(\"equip-body\",(res&&res.data)||[],[\"deviceId\",\"name\",\"model\",\"vendor\",\"status\"]);");
+            html.append("},function(err){");
+            html.append("setWarning(\"equip-warning\",err);");
+            html.append("});");
+            html.append("var createBtn=document.getElementById(\"equip-create\");");
+            html.append("var refreshBtn=document.getElementById(\"equip-refresh\");");
+            html.append("if(refreshBtn){");
+            html.append("refreshBtn.addEventListener(\"click\",function(){");
+            html.append("fetchJson(\"/api/equipments\",function(res){");
+            html.append("fillTable(\"equip-body\",(res&&res.data)||[],[\"deviceId\",\"name\",\"model\",\"vendor\",\"status\"]);");
+            html.append("setWarning(\"equip-warning\",null);");
+            html.append("});");
+            html.append("});");
+            html.append("}");
+            html.append("if(createBtn){");
+            html.append("createBtn.addEventListener(\"click\",function(){");
+            html.append("var payload={");
+            html.append("deviceId:document.getElementById(\"equip-device\").value,");
+            html.append("name:document.getElementById(\"equip-name\").value,");
+            html.append("model:document.getElementById(\"equip-model\").value,");
+            html.append("vendor:document.getElementById(\"equip-vendor\").value,");
+            html.append("status:document.getElementById(\"equip-status\").value");
+            html.append("};");
+            html.append("if(!payload.name){");
+            html.append("setWarning(\"equip-warning\",{errorCode:\"E-0001\",message:\"name required\"});");
+            html.append("return;");
+            html.append("}");
+            html.append("postJson(\"/api/equipments\",payload,function(res){");
+            html.append("document.getElementById(\"equip-result\").textContent=\"등록 완료\";");
+            html.append("setWarning(\"equip-warning\",null);");
+            html.append("fetchJson(\"/api/equipments\",function(listRes){");
+            html.append("fillTable(\"equip-body\",(listRes&&listRes.data)||[],[\"deviceId\",\"name\",\"model\",\"vendor\",\"status\"]);");
+            html.append("});");
+            html.append("},function(err){");
+            html.append("document.getElementById(\"equip-result\").textContent=\"\";");
+            html.append("setWarning(\"equip-warning\",err);");
+            html.append("});");
+            html.append("});");
+            html.append("}");
+            html.append("}");
             html.append("if(document.getElementById(\"orders-body\")){");
             html.append("fetchJson(\"/api/orders\",function(res){");
             html.append("fillTable(\"orders-body\",(res&&res.data)||[],[\"orderId\",\"productCode\",\"productName\",\"quantity\",\"dueDate\",\"status\"]);");
@@ -491,6 +808,35 @@ public final class UiPageTemplate {
             html.append("});");
             html.append("});");
             html.append("}");
+            html.append("}");
+            html.append("var orderCreateBtn=document.getElementById(\"order-create\");");
+            html.append("if(orderCreateBtn){");
+            html.append("orderCreateBtn.addEventListener(\"click\",function(){");
+            html.append("var payload={");
+            html.append("orderNo:document.getElementById(\"order-create-no\").value,");
+            html.append("partnerName:document.getElementById(\"order-create-partner\").value,");
+            html.append("dueDate:document.getElementById(\"order-create-due\").value,");
+            html.append("status:document.getElementById(\"order-create-status\").value");
+            html.append("};");
+            html.append("if(!payload.orderNo){");
+            html.append("setWarning(\"order-create-warning\",{errorCode:\"E-0001\",message:\"orderNo required\"});");
+            html.append("return;");
+            html.append("}");
+            html.append("if(payload.dueDate && !isValidDate(payload.dueDate)){");
+            html.append("setWarning(\"order-create-warning\",{errorCode:\"E-1001\",message:\"invalid date format\"});");
+            html.append("return;");
+            html.append("}");
+            html.append("postJson(\"/api/orders\",payload,function(res){");
+            html.append("document.getElementById(\"order-create-result\").textContent=\"등록 완료\";");
+            html.append("setWarning(\"order-create-warning\",null);");
+            html.append("fetchJson(\"/api/orders\",function(listRes){");
+            html.append("fillTable(\"orders-body\",(listRes&&listRes.data)||[],[\"orderId\",\"productCode\",\"productName\",\"quantity\",\"dueDate\",\"status\"]);");
+            html.append("});");
+            html.append("},function(err){");
+            html.append("document.getElementById(\"order-create-result\").textContent=\"\";");
+            html.append("setWarning(\"order-create-warning\",err);");
+            html.append("});");
+            html.append("});");
             html.append("}");
             html.append("if(document.getElementById(\"jobs-body\")){");
             html.append("fetchJson(\"/api/jobs\",function(res){");
@@ -560,6 +906,40 @@ public final class UiPageTemplate {
             html.append("});");
             html.append("}");
             html.append("}");
+            html.append("var jobCreateBtn=document.getElementById(\"job-create\");");
+            html.append("if(jobCreateBtn){");
+            html.append("jobCreateBtn.addEventListener(\"click\",function(){");
+            html.append("var payload={");
+            html.append("orderId:document.getElementById(\"job-create-order\").value,");
+            html.append("processName:document.getElementById(\"job-create-process\").value,");
+            html.append("startAt:document.getElementById(\"job-create-start\").value,");
+            html.append("endAt:document.getElementById(\"job-create-end\").value,");
+            html.append("status:document.getElementById(\"job-create-status\").value");
+            html.append("};");
+            html.append("if(!payload.orderId||!payload.processName){");
+            html.append("setWarning(\"job-create-warning\",{errorCode:\"E-0001\",message:\"orderId and processName required\"});");
+            html.append("return;");
+            html.append("}");
+            html.append("if(payload.startAt && !/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$/.test(payload.startAt)){");
+            html.append("setWarning(\"job-create-warning\",{errorCode:\"E-1001\",message:\"invalid date format\"});");
+            html.append("return;");
+            html.append("}");
+            html.append("if(payload.endAt && !/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$/.test(payload.endAt)){");
+            html.append("setWarning(\"job-create-warning\",{errorCode:\"E-1001\",message:\"invalid date format\"});");
+            html.append("return;");
+            html.append("}");
+            html.append("postJson(\"/api/jobs\",payload,function(res){");
+            html.append("document.getElementById(\"job-create-result\").textContent=\"등록 완료\";");
+            html.append("setWarning(\"job-create-warning\",null);");
+            html.append("fetchJson(\"/api/jobs\",function(listRes){");
+            html.append("fillTable(\"jobs-body\",(listRes&&listRes.data)||[],[\"jobId\",\"orderId\",\"processName\",\"startAt\",\"endAt\",\"status\"]);");
+            html.append("});");
+            html.append("},function(err){");
+            html.append("document.getElementById(\"job-create-result\").textContent=\"\";");
+            html.append("setWarning(\"job-create-warning\",err);");
+            html.append("});");
+            html.append("});");
+            html.append("}");
             html.append("if(document.getElementById(\"kpi-body\")){");
             html.append("fetchJson(\"/api/kpi\",function(res){");
             html.append("fillTable(\"kpi-body\",(res&&res.data)||[],[\"name\",\"targetValue\",\"currentValue\",\"progressRate\",\"resultValue\",\"unit\"]);");
@@ -627,6 +1007,40 @@ public final class UiPageTemplate {
             html.append("});");
             html.append("}");
             html.append("}");
+            html.append("var kpiCreateBtn=document.getElementById(\"kpi-create\");");
+            html.append("if(kpiCreateBtn){");
+            html.append("kpiCreateBtn.addEventListener(\"click\",function(){");
+            html.append("var payload={");
+            html.append("name:document.getElementById(\"kpi-create-name\").value,");
+            html.append("targetValue:document.getElementById(\"kpi-create-target\").value,");
+            html.append("currentValue:document.getElementById(\"kpi-create-current\").value,");
+            html.append("unit:document.getElementById(\"kpi-create-unit\").value,");
+            html.append("formula:document.getElementById(\"kpi-create-formula\").value");
+            html.append("};");
+            html.append("if(!payload.name){");
+            html.append("setWarning(\"kpi-create-warning\",{errorCode:\"E-0001\",message:\"name required\"});");
+            html.append("return;");
+            html.append("}");
+            html.append("if(payload.targetValue && isNaN(Number(payload.targetValue))){");
+            html.append("setWarning(\"kpi-create-warning\",{errorCode:\"E-1004\",message:\"invalid numeric value\"});");
+            html.append("return;");
+            html.append("}");
+            html.append("if(payload.currentValue && isNaN(Number(payload.currentValue))){");
+            html.append("setWarning(\"kpi-create-warning\",{errorCode:\"E-1004\",message:\"invalid numeric value\"});");
+            html.append("return;");
+            html.append("}");
+            html.append("postJson(\"/api/kpi\",payload,function(res){");
+            html.append("document.getElementById(\"kpi-create-result\").textContent=\"등록 완료\";");
+            html.append("setWarning(\"kpi-create-warning\",null);");
+            html.append("fetchJson(\"/api/kpi\",function(listRes){");
+            html.append("fillTable(\"kpi-body\",(listRes&&listRes.data)||[],[\"name\",\"targetValue\",\"currentValue\",\"progressRate\",\"resultValue\",\"unit\"]);");
+            html.append("});");
+            html.append("},function(err){");
+            html.append("document.getElementById(\"kpi-create-result\").textContent=\"\";");
+            html.append("setWarning(\"kpi-create-warning\",err);");
+            html.append("});");
+            html.append("});");
+            html.append("}");
             html.append("if(document.getElementById(\"kpi-trend-body\")){");
             html.append("fetchJson(\"/api/kpi/trend\",function(res){");
             html.append("var rows=(res&&res.data)||[];");
@@ -656,6 +1070,9 @@ public final class UiPageTemplate {
     // 입력: 원본문자열(null 가능).
     // 출력: HTML 안전 문자열.
     private static String escape(String value) {
+        // 초보자 설명:
+        // - 사용자가 입력한 값을 그대로 HTML에 넣으면 보안 문제가 생길 수 있다.
+        // - 그래서 특수문자를 안전한 문자로 바꿔준다.
         if (value == null) {
             return "";
         }

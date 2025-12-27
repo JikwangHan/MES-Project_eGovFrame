@@ -10,6 +10,9 @@ import org.springframework.web.servlet.DispatcherServlet;
 import com.mes.web.config.WebConfig;
 
 public class EmbeddedTomcat {
+    // 초보자 설명:
+    // - "내장 톰캣"은 별도 설치 없이 자바 프로그램만으로 서버를 띄우는 방식이다.
+    // - 개발 초기에는 설치/배포 과정을 줄여 빠르게 확인할 수 있다.
     // 외장 Tomcat 배포가 어려운 환경에서도 동일한 스캐폴딩을 검증하기 위한 실행 진입점이다.
     // 목적: 별도의 WAS 설치 없이도 로컬 실행이 가능하도록 한다.
     // 이유: 개발 초기 단계에서는 빠른 확인이 더 중요하기 때문이다.

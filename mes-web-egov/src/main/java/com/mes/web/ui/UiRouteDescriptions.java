@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class UiRouteDescriptions {
+    // 초보자 설명:
+    // - 각 화면에 대한 "간단 설명"을 모아둔 사전이다.
+    // - 화면에 들어가면 이 설명이 상단에 표시되어 사용자가 무엇을 해야 하는지 이해한다.
     private static final Map<String, String> DESCRIPTIONS = new HashMap<>();
 
     static {
@@ -56,6 +59,9 @@ public final class UiRouteDescriptions {
     // 입력: 화면 경로.
     // 출력: 설명 문자열(없으면 기본 안내).
     public static String describe(String path) {
+        // 초보자 설명:
+        // - 화면 경로에 맞는 설명을 찾는다.
+        // - 등록되지 않은 경로는 기본 문구를 반환한다.
         if (DESCRIPTIONS.containsKey(path)) {
             return DESCRIPTIONS.get(path);
         }

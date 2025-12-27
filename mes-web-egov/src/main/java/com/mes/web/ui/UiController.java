@@ -6,6 +6,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class UiController {
+    // 초보자 설명:
+    // - "/ui"는 사용자가 처음 들어오는 기본 화면이다.
+    // - 복잡한 기능이 없어도 "접속이 된다"는 것 자체가 중요하다.
     // 목적: UI 스캐폴딩의 최소 진입점을 제공한다.
     // 이유: 화면 라우팅과 레이아웃 골격이 준비되었는지 스모크로 빠르게 확인하기 위함이다.
     // 입력: /ui 경로 요청.
