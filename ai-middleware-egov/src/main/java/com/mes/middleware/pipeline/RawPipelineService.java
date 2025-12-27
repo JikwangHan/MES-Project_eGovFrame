@@ -5,9 +5,14 @@ import org.springframework.stereotype.Service;
 import com.mes.common.logging.PassFailLog;
 import com.mes.middleware.storage.NormalizedStore;
 import com.mes.middleware.storage.QuarantineStore;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class RawPipelineService {
+    // 초보자 설명:
+    // - 이 서비스는 "들어온 원본 데이터"를 간단히 분류하고 저장 위치를 결정한다.
+    // - 확신이 낮으면 격리, 높으면 정규화 저장으로 보낸다.
     // 목적: 확신이 낮은 데이터는 격리 폴더에 저장한다.
     // 이유: 잘못된 파싱/정규화로 데이터가 오염되는 것을 막기 위해서다.
     private final QuarantineStore quarantineStore;
@@ -66,7 +71,7 @@ public class RawPipelineService {
     private NormalizedStore.NormalizedRecord buildRecord(String rawId, String payload, ClassificationResult result) {
         NormalizedStore.NormalizedRecord record = new NormalizedStore.NormalizedRecord();
         record.rawId = rawId;
-        record.deviceHint = "UNKNOWN";
+        record.deviceHint = extractDeviceHint(payload);
         record.protocolHint = result.protocolHint;
         record.format = result.format;
         record.eventType = result.eventType;
@@ -111,6 +116,28 @@ public class RawPipelineService {
         }
         double ratio = (double) nonPrintable / (double) len;
         return ratio > 0.2;
+    }
+
+    // 목적: payload 안에서 deviceId 값을 최대한 찾아낸다.
+    // 이유: 장비 식별이 가능하면 이후 데이터 매핑 정확도가 올라간다.
+    private String extractDeviceHint(String payload) {
+        // 초보자 설명:
+        // - 원본 데이터 안에 "deviceId"가 있으면 그 값을 장비 힌트로 사용한다.
+        // - 없으면 UNKNOWN으로 두어 후속 단계에서 다시 판단할 수 있게 한다.
+        String safe = payload == null ? "" : payload;
+        Pattern p = Pattern.compile("\"deviceId\"\\s*:\\s*\"([^\"]+)\"|\"device_id\"\\s*:\\s*\"([^\"]+)\"");
+        Matcher m = p.matcher(safe);
+        if (m.find()) {
+            String v1 = m.group(1);
+            String v2 = m.group(2);
+            if (v1 != null && !v1.isBlank()) {
+                return v1;
+            }
+            if (v2 != null && !v2.isBlank()) {
+                return v2;
+            }
+        }
+        return "UNKNOWN";
     }
 
     // 목적: 분류 결과와 payload를 검증해 승인/보류/격리를 결정한다.

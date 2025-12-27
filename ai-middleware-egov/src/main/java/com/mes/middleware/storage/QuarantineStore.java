@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class QuarantineStore {
+    // 초보자 설명:
+    // - "격리"는 신뢰도가 낮은 데이터를 따로 보관하는 것이다.
+    // - 나중에 사람이 확인하거나 재처리하기 위해 분리해 둔다.
     // 격리 데이터를 저장할 폴더(상대 경로).
     // 이유: 정규화 실패 데이터는 별도 위치에서 관리해야 재처리가 쉽다.
     private static final String QUARANTINE_DIR = "data/quarantine";

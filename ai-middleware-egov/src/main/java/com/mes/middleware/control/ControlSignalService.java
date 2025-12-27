@@ -15,6 +15,9 @@ import com.mes.common.logging.PassFailLog;
 
 @Service
 public class ControlSignalService {
+    // 초보자 설명:
+    // - 이 서비스는 "장비로 보낼 제어 신호"를 저장하고 전송한다.
+    // - 아직 실제 장비 프로토콜이 없으므로, 전송은 모의 방식으로 처리한다.
     // 제어 신호 원본을 저장할 폴더명(상대 경로).
     // 이유: 장비/프로토콜 미확정 상태에서도 송신 기록을 남겨야 하기 때문이다.
     private static final String CONTROL_DIR = "data/control";

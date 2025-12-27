@@ -21,6 +21,9 @@ import com.mes.middleware.pipeline.RawPipelineService;
 
 @RestController
 public class RawIngestController {
+    // 초보자 설명:
+    // - 장비에서 온 "원본 데이터"를 가장 먼저 받는 API다.
+    // - 받은 데이터를 파일로 저장하고, AI 파이프라인으로 넘긴다.
     // 원본 데이터를 파일로 보관할 폴더명(상대 경로).
     // 이유: 외부 경로를 고정하지 않으면 운영 환경마다 경로가 달라져 관리가 어렵다.
     // 참고: 이 경로는 프로젝트 루트 기준으로 생성된다.

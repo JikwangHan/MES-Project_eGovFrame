@@ -10,6 +10,9 @@ import org.springframework.web.servlet.DispatcherServlet;
 import com.mes.middleware.config.WebConfig;
 
 public class EmbeddedTomcat {
+    // 초보자 설명:
+    // - 이 클래스는 "미들웨어 전용 서버"를 직접 실행한다.
+    // - 별도 톰캣 설치 없이 자바 실행만으로 서비스가 뜬다.
     // 목적: 미들웨어를 독립 프로세스로 실행할 수 있게 한다.
     // 이유: MES Web과 분리된 서비스 구성을 검증해야 하기 때문이다.
     public static void main(String[] args) throws Exception {

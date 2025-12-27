@@ -14,6 +14,9 @@ import com.mes.common.logging.PassFailLog;
 
 @RestController
 public class ControlSignalController {
+    // 초보자 설명:
+    // - 장비 제어 요청을 받는 API이다.
+    // - 실제 장비 제어 대신 "저장 + 모의 송신"으로 흐름을 검증한다.
     private final ControlSignalService controlSignalService;
 
     public ControlSignalController(ControlSignalService controlSignalService) {
@@ -27,6 +30,9 @@ public class ControlSignalController {
     // 출력: 저장된 제어 신호 식별자.
     @PostMapping("/api/control-signal")
     public ResponseEntity<Map<String, Object>> send(@RequestBody String payload) {
+        // 초보자 설명:
+        // - 요청을 받으면 먼저 파일로 저장하고,
+        // - 그 다음 모의 전송을 수행한다.
         try {
             // 1) 제어 신호 원본을 저장한다.
             String id = controlSignalService.store(payload);

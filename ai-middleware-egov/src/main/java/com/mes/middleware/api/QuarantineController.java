@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class QuarantineController {
+    // 초보자 설명:
+    // - 격리된 원본 파일 목록을 조회하는 API다.
+    // - 자동 파싱이 실패한 데이터를 사람이 확인할 수 있다.
     // 격리 데이터를 보관하는 폴더(상대 경로).
     // 이유: 장비/프로토콜을 판단하지 못한 원본을 따로 관리해야 재처리가 가능하다.
     private static final String QUARANTINE_DIR = "data/quarantine";

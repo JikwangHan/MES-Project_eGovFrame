@@ -13,6 +13,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class NormalizedStore {
+    // 초보자 설명:
+    // - "정규화"란 제각각인 원본 데이터를 공통 형태로 바꾸는 과정이다.
+    // - 아직 DB가 없으므로 파일에 저장해 결과를 확인한다.
     // 정규화 데이터를 저장할 폴더(상대 경로).
     // 이유: DB 이전 단계에서 파일 기반으로 먼저 결과를 확인하기 위함이다.
     private static final String NORMALIZED_DIR = "data/normalized";
