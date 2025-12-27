@@ -51,7 +51,8 @@ public class UiRouteController {
         "/ui/admin/responsibles",
         "/ui/admin/partners",
         "/ui/admin/factories-warehouses",
-        "/ui/kpi"
+        "/ui/kpi",
+        "/ui/external-sync/logs"
     }, produces = MediaType.TEXT_HTML_VALUE)
     public String uiRoute(HttpServletRequest request) {
         // 요청 경로에 맞는 설명을 찾아서 화면에 표시한다.
