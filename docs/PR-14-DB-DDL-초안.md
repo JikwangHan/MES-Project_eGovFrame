@@ -53,6 +53,23 @@ CREATE TABLE normalized_event (
   CONSTRAINT fk_norm_company FOREIGN KEY (company_id) REFERENCES company(id)
 );
 
+CREATE TABLE external_sync_log (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  company_id BIGINT NOT NULL,
+  request_id VARCHAR(64),
+  from_date DATE,
+  to_date DATE,
+  status VARCHAR(32) NOT NULL DEFAULT 'ACCEPTED',
+  accepted_at DATETIME,
+  error_code VARCHAR(32),
+  error_message VARCHAR(200),
+  raw_request LONGTEXT,
+  raw_response LONGTEXT,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_sync_company FOREIGN KEY (company_id) REFERENCES company(id)
+);
+
 CREATE TABLE kpi (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   company_id BIGINT NOT NULL,
@@ -61,6 +78,8 @@ CREATE TABLE kpi (
   current_value DECIMAL(12,3),
   unit VARCHAR(32),
   formula VARCHAR(200),
+  remark VARCHAR(200),
+  kpi_date DATE,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_kpi_company FOREIGN KEY (company_id) REFERENCES company(id)
 );
@@ -78,6 +97,9 @@ CREATE TABLE orders (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   company_id BIGINT NOT NULL,
   order_no VARCHAR(64) NOT NULL,
+  product_code VARCHAR(64),
+  product_name VARCHAR(200),
+  quantity DECIMAL(12,3),
   partner_name VARCHAR(100),
   due_date DATE,
   status VARCHAR(32) NOT NULL DEFAULT 'PLANNED',
@@ -91,6 +113,8 @@ CREATE TABLE jobs (
   order_id BIGINT,
   company_id BIGINT NOT NULL,
   process_name VARCHAR(100),
+  equipment_id BIGINT,
+  operator_name VARCHAR(100),
   start_time DATETIME,
   end_time DATETIME,
   status VARCHAR(32) NOT NULL DEFAULT 'PLANNED',
@@ -139,6 +163,8 @@ CREATE INDEX idx_raw_event_company_time ON raw_event(company_id, received_at);
 CREATE INDEX idx_raw_event_device_time ON raw_event(device_id, received_at);
 CREATE INDEX idx_norm_event_company_time ON normalized_event(company_id, event_time);
 CREATE INDEX idx_norm_event_device_time ON normalized_event(device_id, event_time);
+CREATE INDEX idx_sync_company_time ON external_sync_log(company_id, accepted_at);
+CREATE INDEX idx_sync_request_id ON external_sync_log(request_id);
 CREATE INDEX idx_kpi_trend_kpi_date ON kpi_trend(kpi_id, date);
 CREATE INDEX idx_orders_company_no ON orders(company_id, order_no);
 CREATE INDEX idx_jobs_company_time ON jobs(company_id, start_time);
