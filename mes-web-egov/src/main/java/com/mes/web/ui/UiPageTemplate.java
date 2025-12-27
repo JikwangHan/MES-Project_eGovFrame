@@ -16,6 +16,11 @@ public final class UiPageTemplate {
     // - 이 방식은 단순하지만 빠르게 화면 골격을 확인할 수 있다.
     public static String render(String title, String heading, String message, String currentPath) {
         StringBuilder html = new StringBuilder();
+        // -------------------------------------------------------------
+        // 공통 레이아웃 구성
+        // 목적: 모든 화면에서 동일한 헤더/메뉴/기본 스타일을 유지한다.
+        // 이유: 화면마다 레이아웃을 반복 구현하면 수정 비용이 커지기 때문이다.
+        // -------------------------------------------------------------
         // HTML 문서 시작부를 만든다.
         html.append("<!doctype html>");
         html.append("<html lang=\"ko\">");
@@ -47,6 +52,11 @@ public final class UiPageTemplate {
         html.append("<div class=\"wrap\">");
         html.append("<nav>");
         html.append("<div>메뉴</div>");
+        // -------------------------------------------------------------
+        // 메뉴 렌더링
+        // 목적: 현재 경로에 따라 활성 메뉴를 강조 표시한다.
+        // 이유: 사용자가 현재 위치를 쉽게 인지하도록 돕기 위해서다.
+        // -------------------------------------------------------------
         // 메뉴는 UiMenu 정의를 기준으로 반복 출력한다.
         for (UiMenu.MenuGroup group : UiMenu.GROUPS) {
             html.append("<div style=\"margin-top:10px;font-weight:bold;\">")
@@ -62,6 +72,11 @@ public final class UiPageTemplate {
         }
         html.append("</nav>");
         html.append("<main>");
+        // -------------------------------------------------------------
+        // 요약 카드 영역
+        // 목적: 대시보드 느낌을 주는 상단 요약 정보를 보여준다.
+        // 이유: 아직 실제 데이터가 없더라도 화면 구조를 먼저 확인하기 위함이다.
+        // -------------------------------------------------------------
         // 요약 카드 영역(대시보드 느낌을 주기 위한 자리표시자).
         html.append("<div class=\"summary\">");
         html.append("<div class=\"box\">요약 카드 1(데이터 준비 중)</div>");
@@ -88,6 +103,11 @@ public final class UiPageTemplate {
         html.append("<strong>테이블 영역(예정)</strong>");
         html.append("<p>그리드/테이블 UI는 후속 단계에서 적용합니다.</p>");
         html.append("</div>");
+        // -------------------------------------------------------------
+        // 액션 버튼 영역
+        // 목적: 등록/수정/삭제/레포팅/외부연계 흐름의 위치를 고정한다.
+        // 이유: 실제 기능 구현 전에도 사용자 동선을 확인할 수 있어야 한다.
+        // -------------------------------------------------------------
         // 화면 액션 버튼 자리표시자.
         html.append("<div class=\"card\" style=\"margin-bottom:16px;\">");
         html.append("<strong>액션 버튼 영역(예정)</strong>");
@@ -107,6 +127,11 @@ public final class UiPageTemplate {
         html.append("<div style=\"margin-top:6px;color:#475569;font-size:12px;\">");
         html.append("외부기관 연계는 기간(from/to)을 함께 입력해야 합니다. 둘 다 비어 있으면 전체 기간으로 처리됩니다.");
         html.append("</div>");
+        // -------------------------------------------------------------
+        // 외부기관 연계 이력 표시
+        // 목적: 사용자가 최근 요청 결과를 빠르게 확인하도록 로그를 제공한다.
+        // 이유: 연계 실패/성공 여부를 즉시 파악할 수 있어야 하기 때문이다.
+        // -------------------------------------------------------------
         // 외부기관 연계 요청 이력 표시 영역(간단 로그).
         // 목적: 사용자가 최근 요청 결과를 빠르게 확인하게 한다.
         html.append("<div style=\"margin-top:10px;\">");
@@ -345,6 +370,11 @@ public final class UiPageTemplate {
         }
         if ("/ui/kpi".equals(currentPath) || "/ui/orders".equals(currentPath)
             || "/ui/jobs".equals(currentPath) || "/ui/equipment".equals(currentPath)) {
+            // -------------------------------------------------------------
+            // 공통 스크립트 영역
+            // 목적: 테이블 채우기/검증/메시지 처리 등 공통 JS 유틸을 제공한다.
+            // 이유: 화면마다 중복된 스크립트를 줄이고 유지보수를 쉽게 한다.
+            // -------------------------------------------------------------
             // 목적: 화면에서 API 샘플 데이터를 가져와 표 형태로 표시한다.
             // 이유: 실제 DB/차트 연동 전에 데이터 흐름을 검증하기 위함이다.
             // 초보자 설명:
@@ -626,6 +656,11 @@ public final class UiPageTemplate {
             html.append("if(el){el.textContent=\"레포팅 기능은 후속 단계에서 파일 다운로드로 연결됩니다.\";}");
             html.append("});");
             html.append("}");
+            // -------------------------------------------------------------
+            // 외부기관 연계 버튼 처리
+            // 목적: 사용자가 클릭했을 때 기간 검증 후 연계 API를 호출한다.
+            // 이유: 서버로 요청을 보내기 전에 기본 오류를 차단해야 하기 때문이다.
+            // -------------------------------------------------------------
             html.append("var syncBtn=document.getElementById(\"ui-external-sync\");");
             html.append("if(syncBtn){");
             html.append("syncBtn.addEventListener(\"click\",function(){");
