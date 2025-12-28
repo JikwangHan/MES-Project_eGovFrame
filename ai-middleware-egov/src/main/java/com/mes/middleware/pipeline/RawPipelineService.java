@@ -42,14 +42,14 @@ public class RawPipelineService {
     public void process(String rawId, String payload) {
         String safePayload = payload == null ? "" : payload;
         ClassificationResult result = classify(safePayload);
-        ValidationDecision decision = validate(result, safePayload);
-        if (decision == ValidationDecision.QUARANTINE) {
-            quarantineStore.save(rawId, safePayload);
+        ValidationResult decision = validate(result, safePayload);
+        if (decision.decision == ValidationDecision.QUARANTINE) {
+            quarantineStore.save(rawId, safePayload, decision.reason);
             PassFailLog.skip("quarantine " + rawId);
             return;
         }
         NormalizedStore.NormalizedRecord record = buildRecord(rawId, safePayload, result);
-        record.validationStatus = decision.name();
+        record.validationStatus = decision.decision.name();
         normalizedStore.save(record);
         PassFailLog.pass("normalized " + rawId);
     }
@@ -358,26 +358,53 @@ public class RawPipelineService {
 
     // 목적: 분류 결과와 payload를 검증해 승인/보류/격리를 결정한다.
     // 이유: 자동 적재 전에 기본 품질을 확인해야 데이터 오염을 줄일 수 있다.
-    private ValidationDecision validate(ClassificationResult result, String payload) {
+    private ValidationResult validate(ClassificationResult result, String payload) {
+        // 초보자 설명:
+        // - 검증 실패 사유를 남겨야 이후 재처리 기준을 명확히 잡을 수 있다.
+        // - 이유를 함께 반환하면 격리 기준을 점검하기가 쉬워진다.
         if (payload == null || payload.trim().isEmpty()) {
-            return ValidationDecision.QUARANTINE;
+            return ValidationResult.quarantine("EMPTY_PAYLOAD");
         }
         if ("json".equals(result.format) && !looksLikeJson(payload.trim())) {
-            return ValidationDecision.QUARANTINE;
+            return ValidationResult.quarantine("INVALID_JSON");
         }
         if (result.confidence < 0.5) {
-            return ValidationDecision.QUARANTINE;
+            return ValidationResult.quarantine("LOW_CONFIDENCE");
         }
         if (result.confidence < 0.7) {
-            return ValidationDecision.HOLD;
+            return ValidationResult.hold("LOW_CONFIDENCE_HOLD");
         }
-        return ValidationDecision.APPROVED;
+        return ValidationResult.approved("APPROVED");
     }
 
     private enum ValidationDecision {
         APPROVED,
         HOLD,
         QUARANTINE
+    }
+
+    // 목적: 검증 결과와 사유를 함께 보관한다.
+    // 이유: 격리 기준을 투명하게 유지해야 재처리 기준을 맞출 수 있다.
+    private static final class ValidationResult {
+        private final ValidationDecision decision;
+        private final String reason;
+
+        private ValidationResult(ValidationDecision decision, String reason) {
+            this.decision = decision;
+            this.reason = reason;
+        }
+
+        private static ValidationResult approved(String reason) {
+            return new ValidationResult(ValidationDecision.APPROVED, reason);
+        }
+
+        private static ValidationResult hold(String reason) {
+            return new ValidationResult(ValidationDecision.HOLD, reason);
+        }
+
+        private static ValidationResult quarantine(String reason) {
+            return new ValidationResult(ValidationDecision.QUARANTINE, reason);
+        }
     }
 
     public static final class ClassificationResult {

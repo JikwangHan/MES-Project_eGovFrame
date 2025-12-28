@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.OffsetDateTime;
 
 import org.springframework.stereotype.Service;
 
@@ -21,12 +22,22 @@ public class QuarantineStore {
     // 이유: 자동 파싱 실패 시 원본을 안전하게 보관하기 위함이다.
     // 입력: rawId(원본 식별자), payload(원본 문자열).
     // 출력: 없음(파일 저장).
-    public void save(String rawId, String payload) {
+    public void save(String rawId, String payload, String reason) {
         try {
             Path dir = Paths.get(QUARANTINE_DIR);
             Files.createDirectories(dir);
             Path file = dir.resolve(rawId + ".raw");
             Files.writeString(file, payload == null ? "" : payload, StandardCharsets.UTF_8);
+            // 목적: 격리 사유를 메타 파일로 보관한다.
+            // 이유: 사유가 있어야 후속 재처리 기준을 빠르게 합의할 수 있다.
+            Path meta = dir.resolve(rawId + ".meta.json");
+            String safeReason = reason == null ? "" : reason.replace("\"", "\\\"");
+            String json = "{"
+                    + "\"rawId\":\"" + rawId + "\","
+                    + "\"reason\":\"" + safeReason + "\","
+                    + "\"quarantinedAt\":\"" + OffsetDateTime.now().toString() + "\""
+                    + "}";
+            Files.writeString(meta, json, StandardCharsets.UTF_8);
         } catch (IOException ex) {
             // 격리 실패 시에도 업링크 처리는 유지한다.
         }
