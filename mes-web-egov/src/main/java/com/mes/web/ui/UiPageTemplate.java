@@ -155,19 +155,38 @@ public final class UiPageTemplate {
             // 외부기관 연계 이력 조회 화면: 필터 입력과 표 구조를 제공한다.
             // 초보자 설명:
             // - 아직 DB/API가 없더라도 화면에서 입력/검증 흐름을 확인한다.
+            // - 요청 ID/기관명/키워드/빠른 기간 버튼을 추가해 조회 기준을 명확히 한다.
             html.append("<div class=\"card\" style=\"margin-bottom:16px;\">");
-            html.append("<strong>연계 이력 조회(초안)</strong>");
-            html.append("<div style=\"display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;\">");
-            html.append("<input id=\"sync-from\" placeholder=\"기간 시작(YYYY-MM-DD)\" style=\"padding:6px;\" />");
-            html.append("<input id=\"sync-to\" placeholder=\"기간 종료(YYYY-MM-DD)\" style=\"padding:6px;\" />");
-            html.append("<input id=\"sync-status\" placeholder=\"상태(ACCEPTED/FAILED)\" style=\"padding:6px;\" />");
-            html.append("<button id=\"sync-search\" style=\"padding:6px 10px;\">조회</button>");
-            html.append("<button id=\"sync-reset\" style=\"padding:6px 10px;\">초기화</button>");
+            html.append("<strong>연계 이력 조회(고도화)</strong>");
+            html.append("<div style=\"display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin-top:8px;\">");
+            html.append("<div><div style=\"font-size:12px;color:#6b7280;\">요청 ID</div><input id=\"sync-request-id\" placeholder=\"요청ID\" style=\"padding:6px;width:100%;\" /></div>");
+            html.append("<div><div style=\"font-size:12px;color:#6b7280;\">기관명</div><input id=\"sync-agency\" placeholder=\"기관명\" style=\"padding:6px;width:100%;\" /></div>");
+            html.append("<div><div style=\"font-size:12px;color:#6b7280;\">기간 시작</div><input id=\"sync-from\" placeholder=\"YYYY-MM-DD\" style=\"padding:6px;width:100%;\" /></div>");
+            html.append("<div><div style=\"font-size:12px;color:#6b7280;\">기간 종료</div><input id=\"sync-to\" placeholder=\"YYYY-MM-DD\" style=\"padding:6px;width:100%;\" /></div>");
+            html.append("<div><div style=\"font-size:12px;color:#6b7280;\">상태</div><select id=\"sync-status\" style=\"padding:6px;width:100%;\">");
+            html.append("<option value=\"\">전체</option>");
+            html.append("<option value=\"ACCEPTED\">ACCEPTED</option>");
+            html.append("<option value=\"FAILED\">FAILED</option>");
+            html.append("</select></div>");
+            html.append("<div><div style=\"font-size:12px;color:#6b7280;\">메시지 키워드</div><input id=\"sync-keyword\" placeholder=\"키워드\" style=\"padding:6px;width:100%;\" /></div>");
+            html.append("</div>");
+            // 빠른 기간 버튼은 사용자가 기간 입력을 반복하지 않도록 돕는다.
+            html.append("<div class=\"action-bar\" style=\"margin-top:8px;\">");
+            html.append("<button class=\"btn\" id=\"sync-range-today\">오늘</button>");
+            html.append("<button class=\"btn\" id=\"sync-range-7\">최근 7일</button>");
+            html.append("<button class=\"btn\" id=\"sync-range-30\">최근 30일</button>");
+            html.append("<button class=\"btn\" id=\"sync-clear\">전체기간</button>");
+            html.append("<button class=\"btn primary\" id=\"sync-search\">조회</button>");
+            html.append("<button class=\"btn\" id=\"sync-reset\">초기화</button>");
             html.append("</div>");
             html.append("<div id=\"sync-warning\" style=\"margin-top:8px;color:#b91c1c;\"></div>");
+            html.append("<p style=\"margin-top:8px;color:#6b7280;\">날짜는 YYYY-MM-DD 형식으로 입력합니다. 기간은 시작/종료를 함께 입력합니다.</p>");
+            html.append("<div id=\"sync-summary\" style=\"margin-top:6px;color:#6b7280;\"></div>");
             html.append("</div>");
+            // 결과 요약은 조회 건수를 빠르게 확인하도록 제공한다.
             html.append("<div class=\"card\" style=\"margin-bottom:16px;\">");
             html.append("<strong>연계 이력 목록(임시)</strong>");
+            html.append("<div id=\"sync-result-summary\" style=\"margin-top:6px;color:#6b7280;\"></div>");
             html.append("<table style=\"width:100%;border-collapse:collapse;margin-top:8px;\">");
             html.append("<thead><tr>");
             html.append("<th style=\"border-bottom:1px solid #ddd;text-align:left;\">시간</th>");
@@ -177,7 +196,7 @@ public final class UiPageTemplate {
             html.append("<th style=\"border-bottom:1px solid #ddd;text-align:left;\">메시지</th>");
             html.append("</tr></thead>");
             html.append("<tbody id=\"sync-log-body\">");
-            html.append("<tr><td colspan=\"5\" style=\"padding:4px 0;\">데이터 로딩 중...</td></tr>");
+            html.append("<tr><td colspan=\"5\" style=\"padding:4px 0;\">조회 대기</td></tr>");
             html.append("</tbody>");
             html.append("</table>");
             html.append("</div>");
@@ -400,7 +419,8 @@ public final class UiPageTemplate {
             html.append("</div>");
         }
         if ("/ui/kpi".equals(currentPath) || "/ui/orders".equals(currentPath)
-            || "/ui/jobs".equals(currentPath) || "/ui/equipment".equals(currentPath)) {
+            || "/ui/jobs".equals(currentPath) || "/ui/equipment".equals(currentPath)
+            || "/ui/external-sync/logs".equals(currentPath)) {
             // -------------------------------------------------------------
             // 공통 스크립트 영역
             // 목적: 테이블 채우기/검증/메시지 처리 등 공통 JS 유틸을 제공한다.
@@ -513,6 +533,7 @@ public final class UiPageTemplate {
             html.append("var map={");
             html.append("orderId:\"수주번호\",partnerName:\"거래처명\",dueFrom:\"납기일 시작\",dueTo:\"납기일 종료\",status:\"상태\",");
             html.append("jobId:\"작업 ID\",processName:\"공정명\",from:\"기간 시작\",to:\"기간 종료\",");
+            html.append("requestId:\"요청ID\",agency:\"기관명\",keyword:\"메시지\",");
             html.append("name:\"KPI명\",kpiId:\"KPI ID\"");
             html.append("};");
             html.append("return map[key]||key;");
@@ -538,7 +559,7 @@ public final class UiPageTemplate {
             html.append("if(v){cleaned[k]=v;}");
             html.append("});");
             html.append("var keys=Object.keys(cleaned);");
-            html.append("var order=[\"orderId\",\"partnerName\",\"dueFrom\",\"dueTo\",\"status\",\"jobId\",\"processName\",\"from\",\"to\",\"name\",\"kpiId\"];");
+            html.append("var order=[\"orderId\",\"partnerName\",\"dueFrom\",\"dueTo\",\"status\",\"jobId\",\"processName\",\"from\",\"to\",\"requestId\",\"agency\",\"keyword\",\"name\",\"kpiId\"];");
             html.append("keys.sort(function(a,b){");
             html.append("var ia=order.indexOf(a);");
             html.append("var ib=order.indexOf(b);");
