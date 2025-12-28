@@ -14,6 +14,14 @@
   <name>edge-gateway-egov</name>
   <packaging>jar</packaging>
 
+  <dependencies>
+    <dependency>
+      <groupId>com.mes</groupId>
+      <artifactId>mes-common</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+
   <build>
     <plugins>
       <plugin>
