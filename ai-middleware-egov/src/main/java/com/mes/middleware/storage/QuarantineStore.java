@@ -23,7 +23,11 @@ public class QuarantineStore {
     // 입력: rawId(원본 식별자), payload(원본 문자열).
     // 출력: 없음(파일 저장).
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     public void save(String rawId, String payload, String reason) {
+=======
+    public void save(String rawId, String payload, String reason, String summary) {
+>>>>>>> Stashed changes
 =======
     public void save(String rawId, String payload, String reason, String summary) {
 >>>>>>> Stashed changes
@@ -31,6 +35,7 @@ public class QuarantineStore {
             Path dir = Paths.get(QUARANTINE_DIR);
             Files.createDirectories(dir);
             Path file = dir.resolve(rawId + ".raw");
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
             Files.writeString(file, payload == null ? "" : payload, StandardCharsets.UTF_8);
             // 목적: 격리 사유를 메타 파일로 보관한다.
@@ -41,6 +46,8 @@ public class QuarantineStore {
                     + "\"rawId\":\"" + rawId + "\","
                     + "\"reason\":\"" + safeReason + "\","
 =======
+=======
+>>>>>>> Stashed changes
             String safePayload = payload == null ? "" : payload;
             Files.writeString(file, safePayload, StandardCharsets.UTF_8);
             // 목적: 격리 사유/요약/시간을 메타 파일로 보관한다.
@@ -54,6 +61,9 @@ public class QuarantineStore {
                     + "\"reason\":\"" + safeReason + "\","
                     + "\"summary\":\"" + safeSummary + "\","
                     + "\"payloadSize\":" + payloadSize + ","
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
                     + "\"quarantinedAt\":\"" + OffsetDateTime.now().toString() + "\""
                     + "}";

@@ -45,7 +45,12 @@ public class RawPipelineService {
         ValidationResult decision = validate(result, safePayload);
         if (decision.decision == ValidationDecision.QUARANTINE) {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             quarantineStore.save(rawId, safePayload, decision.reason);
+=======
+            String summary = buildQuarantineSummary(result, safePayload);
+            quarantineStore.save(rawId, safePayload, decision.reason, summary);
+>>>>>>> Stashed changes
 =======
             String summary = buildQuarantineSummary(result, safePayload);
             quarantineStore.save(rawId, safePayload, decision.reason, summary);
@@ -366,8 +371,12 @@ public class RawPipelineService {
     private ValidationResult validate(ClassificationResult result, String payload) {
         // 초보자 설명:
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         // - 검증 실패 사유를 남겨야 이후 재처리 기준을 명확히 잡을 수 있다.
         // - 이유를 함께 반환하면 격리 기준을 점검하기가 쉬워진다.
+=======
+        // - 격리 사유를 함께 기록해야 나중에 재처리 기준을 쉽게 확정할 수 있다.
+>>>>>>> Stashed changes
 =======
         // - 격리 사유를 함께 기록해야 나중에 재처리 기준을 쉽게 확정할 수 있다.
 >>>>>>> Stashed changes
@@ -385,7 +394,10 @@ public class RawPipelineService {
         }
         return ValidationResult.approved("APPROVED");
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
     }
 
     // 목적: 격리 사유를 한 줄로 요약한다.
@@ -397,6 +409,9 @@ public class RawPipelineService {
         return "format=" + format
                 + ", confidence=" + String.format(Locale.ROOT, "%.2f", confidence)
                 + ", size=" + size;
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
     }
 
