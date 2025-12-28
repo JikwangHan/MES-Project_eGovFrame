@@ -1,6 +1,7 @@
 package com.mes.gateway.downlink;
 
 import com.mes.gateway.GatewayArgs;
+import com.mes.gateway.GatewayLogReason;
 
 import java.io.IOException;
 import java.net.URI;
@@ -26,7 +27,7 @@ public class DownlinkFlow {
         if (url == null || url.isBlank()) {
             // 다운링크 URL이 없으면 스킵으로 처리한다.
             // 이유: PR-A1에서는 다운링크 계약이 확정되지 않았기 때문이다.
-            return DownlinkResult.skip();
+            return DownlinkResult.skip(GatewayLogReason.DOWNLINK_URL_MISSING);
         }
 
         HttpClient client = HttpClient.newBuilder()
@@ -42,20 +43,20 @@ public class DownlinkFlow {
             int status = response.statusCode();
             if (status == 204) {
                 // 명령이 없는 경우는 스킵 처리한다.
-                return DownlinkResult.skip();
+                return DownlinkResult.skip(GatewayLogReason.DOWNLINK_NO_COMMAND);
             }
             if (status == 200) {
                 if (args.getDownlinkOutputPath() != null && !args.getDownlinkOutputPath().isBlank()) {
                     boolean stored = writeOutput(args.getDownlinkOutputPath(), response.body());
                     if (!stored) {
-                        return DownlinkResult.fail(status);
+                        return DownlinkResult.fail(status, GatewayLogReason.DOWNLINK_OUTPUT_WRITE_ERROR);
                     }
                 }
                 return DownlinkResult.success(status);
             }
-            return DownlinkResult.fail(status);
+            return DownlinkResult.fail(status, GatewayLogReason.DOWNLINK_BAD_STATUS);
         } catch (IOException | InterruptedException ex) {
-            return DownlinkResult.fail(0);
+            return DownlinkResult.fail(0, GatewayLogReason.DOWNLINK_SEND_ERROR);
         }
     }
 
