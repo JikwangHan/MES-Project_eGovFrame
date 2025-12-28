@@ -22,11 +22,16 @@ public class QuarantineStore {
     // 이유: 자동 파싱 실패 시 원본을 안전하게 보관하기 위함이다.
     // 입력: rawId(원본 식별자), payload(원본 문자열).
     // 출력: 없음(파일 저장).
+<<<<<<< Updated upstream
     public void save(String rawId, String payload, String reason) {
+=======
+    public void save(String rawId, String payload, String reason, String summary) {
+>>>>>>> Stashed changes
         try {
             Path dir = Paths.get(QUARANTINE_DIR);
             Files.createDirectories(dir);
             Path file = dir.resolve(rawId + ".raw");
+<<<<<<< Updated upstream
             Files.writeString(file, payload == null ? "" : payload, StandardCharsets.UTF_8);
             // 목적: 격리 사유를 메타 파일로 보관한다.
             // 이유: 사유가 있어야 후속 재처리 기준을 빠르게 합의할 수 있다.
@@ -35,11 +40,35 @@ public class QuarantineStore {
             String json = "{"
                     + "\"rawId\":\"" + rawId + "\","
                     + "\"reason\":\"" + safeReason + "\","
+=======
+            String safePayload = payload == null ? "" : payload;
+            Files.writeString(file, safePayload, StandardCharsets.UTF_8);
+            // 목적: 격리 사유/요약/시간을 메타 파일로 보관한다.
+            // 이유: 재처리 기준을 빠르게 합의할 수 있도록 최소 정보를 남기기 위함이다.
+            Path meta = dir.resolve(rawId + ".meta.json");
+            String safeReason = escape(reason);
+            String safeSummary = escape(summary);
+            int payloadSize = safePayload.length();
+            String json = "{"
+                    + "\"rawId\":\"" + rawId + "\","
+                    + "\"reason\":\"" + safeReason + "\","
+                    + "\"summary\":\"" + safeSummary + "\","
+                    + "\"payloadSize\":" + payloadSize + ","
+>>>>>>> Stashed changes
                     + "\"quarantinedAt\":\"" + OffsetDateTime.now().toString() + "\""
                     + "}";
             Files.writeString(meta, json, StandardCharsets.UTF_8);
         } catch (IOException ex) {
             // 격리 실패 시에도 업링크 처리는 유지한다.
         }
+    }
+
+    // 목적: 메타 JSON에 안전하게 들어가도록 이스케이프 처리한다.
+    // 이유: 따옴표/역슬래시가 포함되면 JSON이 깨질 수 있기 때문이다.
+    private String escape(String value) {
+        if (value == null) {
+            return "";
+        }
+        return value.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 }

@@ -44,7 +44,12 @@ public class RawPipelineService {
         ClassificationResult result = classify(safePayload);
         ValidationResult decision = validate(result, safePayload);
         if (decision.decision == ValidationDecision.QUARANTINE) {
+<<<<<<< Updated upstream
             quarantineStore.save(rawId, safePayload, decision.reason);
+=======
+            String summary = buildQuarantineSummary(result, safePayload);
+            quarantineStore.save(rawId, safePayload, decision.reason, summary);
+>>>>>>> Stashed changes
             PassFailLog.skip("quarantine " + rawId);
             return;
         }
@@ -360,8 +365,12 @@ public class RawPipelineService {
     // 이유: 자동 적재 전에 기본 품질을 확인해야 데이터 오염을 줄일 수 있다.
     private ValidationResult validate(ClassificationResult result, String payload) {
         // 초보자 설명:
+<<<<<<< Updated upstream
         // - 검증 실패 사유를 남겨야 이후 재처리 기준을 명확히 잡을 수 있다.
         // - 이유를 함께 반환하면 격리 기준을 점검하기가 쉬워진다.
+=======
+        // - 격리 사유를 함께 기록해야 나중에 재처리 기준을 쉽게 확정할 수 있다.
+>>>>>>> Stashed changes
         if (payload == null || payload.trim().isEmpty()) {
             return ValidationResult.quarantine("EMPTY_PAYLOAD");
         }
@@ -375,6 +384,20 @@ public class RawPipelineService {
             return ValidationResult.hold("LOW_CONFIDENCE_HOLD");
         }
         return ValidationResult.approved("APPROVED");
+<<<<<<< Updated upstream
+=======
+    }
+
+    // 목적: 격리 사유를 한 줄로 요약한다.
+    // 이유: 운영자가 빠르게 원인을 파악할 수 있도록 최소 정보를 묶어 제공하기 위함이다.
+    private String buildQuarantineSummary(ClassificationResult result, String payload) {
+        int size = payload == null ? 0 : payload.length();
+        String format = result == null ? "unknown" : result.format;
+        double confidence = result == null ? 0.0 : result.confidence;
+        return "format=" + format
+                + ", confidence=" + String.format(Locale.ROOT, "%.2f", confidence)
+                + ", size=" + size;
+>>>>>>> Stashed changes
     }
 
     private enum ValidationDecision {
