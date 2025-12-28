@@ -201,6 +201,45 @@ public final class UiPageTemplate {
             html.append("</table>");
             html.append("</div>");
         }
+        if ("/ui/login".equals(currentPath)) {
+            // 로그인 화면 스캐폴딩.
+            // 목적: 로그인 입력과 안내 흐름을 화면에 고정한다.
+            // 이유: 인증 API 준비 전에도 입력/검증 동선을 확인해야 한다.
+            html.append("<div class=\"card\" style=\"margin-bottom:16px;\">");
+            html.append("<strong>로그인</strong>");
+            html.append("<div style=\"display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;\">");
+            html.append("<input id=\"login-id\" placeholder=\"아이디(필수)\" style=\"padding:6px;\" />");
+            html.append("<input id=\"login-password\" type=\"password\" placeholder=\"비밀번호(필수)\" style=\"padding:6px;\" />");
+            html.append("<button id=\"login-submit\" style=\"padding:6px 10px;\">로그인</button>");
+            html.append("</div>");
+            html.append("<div id=\"login-warning\" style=\"margin-top:8px;color:#b91c1c;\"></div>");
+            html.append("<div id=\"login-result\" style=\"margin-top:8px;color:#065f46;\"></div>");
+            html.append("</div>");
+            html.append("<div class=\"card\" style=\"margin-bottom:16px;\">");
+            html.append("<strong>안내</strong>");
+            html.append("<p>로그인은 아이디와 비밀번호 입력이 필수입니다. 인증 API는 후속 단계에서 연결됩니다.</p>");
+            html.append("</div>");
+        }
+        if ("/ui/account/change-password".equals(currentPath)) {
+            // 비밀번호 변경 화면 스캐폴딩.
+            // 목적: 변경 입력(현재/신규/확인)을 미리 고정한다.
+            // 이유: 정책 검증과 오류 메시지 흐름을 화면에서 먼저 확인하기 위함이다.
+            html.append("<div class=\"card\" style=\"margin-bottom:16px;\">");
+            html.append("<strong>비밀번호 변경</strong>");
+            html.append("<div style=\"display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;\">");
+            html.append("<input id=\"pw-current\" type=\"password\" placeholder=\"현재 비밀번호(필수)\" style=\"padding:6px;\" />");
+            html.append("<input id=\"pw-new\" type=\"password\" placeholder=\"신규 비밀번호(필수)\" style=\"padding:6px;\" />");
+            html.append("<input id=\"pw-confirm\" type=\"password\" placeholder=\"신규 비밀번호 확인\" style=\"padding:6px;\" />");
+            html.append("<button id=\"pw-submit\" style=\"padding:6px 10px;\">변경</button>");
+            html.append("</div>");
+            html.append("<div id=\"pw-warning\" style=\"margin-top:8px;color:#b91c1c;\"></div>");
+            html.append("<div id=\"pw-result\" style=\"margin-top:8px;color:#065f46;\"></div>");
+            html.append("</div>");
+            html.append("<div class=\"card\" style=\"margin-bottom:16px;\">");
+            html.append("<strong>안내</strong>");
+            html.append("<p>신규 비밀번호와 확인 값이 일치해야 합니다. 정책(길이/조합)은 후속 단계에서 강화합니다.</p>");
+            html.append("</div>");
+        }
         if ("/ui/equipment".equals(currentPath)) {
             // 설비 등록 화면에서 기본 등록 폼을 제공한다.
             // 초보자 설명:
@@ -1270,6 +1309,53 @@ public final class UiPageTemplate {
             html.append("}");
             html.append("syncSetResultSummary(null);");
             html.append("syncUpdateState();");
+            html.append("}");
+            html.append("})();");
+            html.append("</script>");
+        }
+        if ("/ui/login".equals(currentPath) || "/ui/account/change-password".equals(currentPath)) {
+            // 로그인/비밀번호 변경 전용 스크립트.
+            // 목적: 입력 검증과 안내 메시지를 즉시 보여준다.
+            // 이유: 서버 API가 없어도 사용자 흐름을 확인할 수 있어야 한다.
+            html.append("<script>");
+            html.append("(function(){");
+            html.append("function setText(id,text){");
+            html.append("var el=document.getElementById(id);");
+            html.append("if(el){el.textContent=text||\"\";}");
+            html.append("}");
+            html.append("var loginBtn=document.getElementById(\"login-submit\");");
+            html.append("if(loginBtn){");
+            html.append("loginBtn.addEventListener(\"click\",function(){");
+            html.append("var id=document.getElementById(\"login-id\").value;");
+            html.append("var pw=document.getElementById(\"login-password\").value;");
+            html.append("if(!id||!pw){");
+            html.append("setText(\"login-warning\",\"아이디와 비밀번호는 필수입니다.\");");
+            html.append("setText(\"login-result\",\"\");");
+            html.append("return;");
+            html.append("}");
+            html.append("setText(\"login-warning\",\"\");");
+            html.append("setText(\"login-result\",\"로그인 요청이 접수되었습니다.(임시)\");");
+            html.append("});");
+            html.append("}");
+            html.append("var pwBtn=document.getElementById(\"pw-submit\");");
+            html.append("if(pwBtn){");
+            html.append("pwBtn.addEventListener(\"click\",function(){");
+            html.append("var current=document.getElementById(\"pw-current\").value;");
+            html.append("var next=document.getElementById(\"pw-new\").value;");
+            html.append("var confirm=document.getElementById(\"pw-confirm\").value;");
+            html.append("if(!current||!next){");
+            html.append("setText(\"pw-warning\",\"현재/신규 비밀번호는 필수입니다.\");");
+            html.append("setText(\"pw-result\",\"\");");
+            html.append("return;");
+            html.append("}");
+            html.append("if(next!==confirm){");
+            html.append("setText(\"pw-warning\",\"신규 비밀번호와 확인 값이 일치하지 않습니다.\");");
+            html.append("setText(\"pw-result\",\"\");");
+            html.append("return;");
+            html.append("}");
+            html.append("setText(\"pw-warning\",\"\");");
+            html.append("setText(\"pw-result\",\"비밀번호 변경 요청이 접수되었습니다.(임시)\");");
+            html.append("});");
             html.append("}");
             html.append("})();");
             html.append("</script>");
