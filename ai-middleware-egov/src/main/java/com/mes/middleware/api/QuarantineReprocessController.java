@@ -1,0 +1,61 @@
+package com.mes.middleware.api;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.mes.middleware.pipeline.QuarantineReprocessService;
+
+@RestController
+public class QuarantineReprocessController {
+    // 목적: 격리 데이터 재처리 요청을 받아 흐름을 연결한다.
+    // 이유: 재처리 요청은 API로만 일관되게 처리해야 운영이 단순해진다.
+    private final QuarantineReprocessService reprocessService;
+
+    public QuarantineReprocessController(QuarantineReprocessService reprocessService) {
+        this.reprocessService = reprocessService;
+    }
+
+    // 목적: 격리 데이터 재처리 요청을 수행한다.
+    // 이유: 운영자가 재처리 결과를 즉시 확인할 수 있어야 하기 때문이다.
+    @PostMapping("/api/quarantine/reprocess")
+    public ResponseEntity<Map<String, Object>> reprocess(@RequestBody Map<String, String> body) {
+        String rawId = body == null ? null : body.get("rawId");
+        QuarantineReprocessService.ReprocessResult result = reprocessService.reprocess(rawId);
+        if (!result.success) {
+            HttpStatus status = "NOT_FOUND".equals(result.code)
+                    ? HttpStatus.NOT_FOUND
+                    : HttpStatus.BAD_REQUEST;
+            return ResponseEntity.status(status).body(fail(result.code, result.reason));
+        }
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("decision", result.decision);
+        data.put("reason", result.reason);
+        data.put("summary", result.summary);
+        return ResponseEntity.ok(ok(data));
+    }
+
+    // 공통 성공 응답 포맷.
+    private Map<String, Object> ok(Object data) {
+        Map<String, Object> res = new LinkedHashMap<>();
+        res.put("result", "OK");
+        res.put("message", "");
+        res.put("data", data);
+        return res;
+    }
+
+    // 공통 실패 응답 포맷.
+    private Map<String, Object> fail(String errorCode, String message) {
+        Map<String, Object> res = new LinkedHashMap<>();
+        res.put("result", "FAIL");
+        res.put("message", message);
+        res.put("errorCode", errorCode);
+        res.put("data", null);
+        return res;
+    }
+}
