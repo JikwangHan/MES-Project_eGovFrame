@@ -1,5 +1,12 @@
 package com.mes.middleware.pipeline;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -7,15 +14,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mes.common.logging.PassFailLog;
 import com.mes.middleware.storage.NormalizedStore;
 import com.mes.middleware.storage.QuarantineStore;
-<<<<<<< Updated upstream
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-=======
->>>>>>> Stashed changes
-import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Service
 public class RawPipelineService {
@@ -41,27 +39,13 @@ public class RawPipelineService {
     // 목적: 원본 데이터를 최소 분류해 정규화 또는 격리로 분기한다.
     // 이유: P1 단계에서 자동 식별/파싱의 최소 동작 경로를 확보하기 위함이다.
     // 입력: rawId(원본 식별자), payload(원본 문자열).
-    // 출력: 없음(저장소에 저장 + 로그만 남김).
+    // 출력: 검증 결과(결정/사유/요약).
     public ValidationResult process(String rawId, String payload) {
         String safePayload = payload == null ? "" : payload;
         ClassificationResult result = classify(safePayload);
         ValidationResult decision = validate(result, safePayload);
         if (decision.decision == ValidationDecision.QUARANTINE) {
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-            quarantineStore.save(rawId, safePayload, decision.reason);
-=======
-            String summary = buildQuarantineSummary(result, safePayload);
-            quarantineStore.save(rawId, safePayload, decision.reason, summary);
->>>>>>> Stashed changes
-=======
-            String summary = buildQuarantineSummary(result, safePayload);
-            quarantineStore.save(rawId, safePayload, decision.reason, summary);
->>>>>>> Stashed changes
-=======
             quarantineStore.save(rawId, safePayload, decision.reason, decision.summary);
->>>>>>> Stashed changes
             PassFailLog.skip("quarantine " + rawId);
             return decision;
         }
@@ -269,7 +253,7 @@ public class RawPipelineService {
     }
 
     // 목적: CSV에서 헤더/값 구조를 간단히 파싱한다.
-    // 이유: 복잡한 CSV 파서 없이도 최소 힌트를 얻어 PR-B2 목표를 달성하기 위함이다.
+    // 이유: 복잡한 CSV 파서 없이도 최소 힌트를 얻어 PR-B5 기준을 맞추기 위함이다.
     private CsvView parseCsv(String payload) {
         if (payload == null) {
             return null;
@@ -347,6 +331,41 @@ public class RawPipelineService {
         }
     }
 
+    // 목적: 재처리/격리 기록에 쓸 요약 정보를 만든다.
+    // 이유: 운영자가 빠르게 상황을 판단할 수 있도록 최소 정보를 묶어 제공하기 위함이다.
+    private String buildProcessSummary(ClassificationResult result, String payload) {
+        int size = payload == null ? 0 : payload.length();
+        String format = result == null ? "unknown" : result.format;
+        double confidence = result == null ? 0.0 : result.confidence;
+        String type = result == null ? "unknown" : result.eventType;
+        return "format=" + format
+                + ", type=" + type
+                + ", confidence=" + String.format(Locale.ROOT, "%.2f", confidence)
+                + ", size=" + size;
+    }
+
+    // 목적: 분류 결과와 payload를 검증해 승인/보류/격리를 결정한다.
+    // 이유: 자동 적재 전에 기본 품질을 확인해야 데이터 오염을 줄일 수 있다.
+    private ValidationResult validate(ClassificationResult result, String payload) {
+        // 초보자 설명:
+        // - 격리 사유를 남겨야 재처리 판단 기준을 명확히 유지할 수 있다.
+        // - 같은 입력이 반복될 때도 동일한 이유로 처리할 수 있도록 한다.
+        String summary = buildProcessSummary(result, payload);
+        if (payload == null || payload.trim().isEmpty()) {
+            return ValidationResult.quarantine("EMPTY_PAYLOAD", summary);
+        }
+        if ("json".equals(result.format) && !looksLikeJson(payload.trim())) {
+            return ValidationResult.quarantine("INVALID_JSON", summary);
+        }
+        if (result.confidence < 0.5) {
+            return ValidationResult.quarantine("LOW_CONFIDENCE", summary);
+        }
+        if (result.confidence < 0.7) {
+            return ValidationResult.hold("LOW_CONFIDENCE_HOLD", summary);
+        }
+        return ValidationResult.approved("APPROVED", summary);
+    }
+
     // 목적: CSV 헤더와 값 라인을 간단히 묶어 검색하기 위한 구조체다.
     // 이유: 여러 키를 순회할 때 반복 파싱을 피하고 유지보수를 쉽게 하기 위함이다.
     private static final class CsvView {
@@ -374,116 +393,12 @@ public class RawPipelineService {
         }
     }
 
-    // 목적: 분류 결과와 payload를 검증해 승인/보류/격리를 결정한다.
-    // 이유: 자동 적재 전에 기본 품질을 확인해야 데이터 오염을 줄일 수 있다.
-    private ValidationResult validate(ClassificationResult result, String payload) {
-        // 초보자 설명:
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-        // - 검증 실패 사유를 남겨야 이후 재처리 기준을 명확히 잡을 수 있다.
-        // - 이유를 함께 반환하면 격리 기준을 점검하기가 쉬워진다.
-=======
-        // - 격리 사유를 함께 기록해야 나중에 재처리 기준을 쉽게 확정할 수 있다.
->>>>>>> Stashed changes
-=======
-        // - 격리 사유를 함께 기록해야 나중에 재처리 기준을 쉽게 확정할 수 있다.
->>>>>>> Stashed changes
-        if (payload == null || payload.trim().isEmpty()) {
-            return ValidationResult.quarantine("EMPTY_PAYLOAD");
-        }
-        if ("json".equals(result.format) && !looksLikeJson(payload.trim())) {
-            return ValidationResult.quarantine("INVALID_JSON");
-        }
-        if (result.confidence < 0.5) {
-            return ValidationResult.quarantine("LOW_CONFIDENCE");
-        }
-        if (result.confidence < 0.7) {
-            return ValidationResult.hold("LOW_CONFIDENCE_HOLD");
-        }
-        return ValidationResult.approved("APPROVED");
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
-=======
->>>>>>> Stashed changes
-    }
-
-    // 목적: 격리 사유를 한 줄로 요약한다.
-    // 이유: 운영자가 빠르게 원인을 파악할 수 있도록 최소 정보를 묶어 제공하기 위함이다.
-    private String buildQuarantineSummary(ClassificationResult result, String payload) {
-        int size = payload == null ? 0 : payload.length();
-        String format = result == null ? "unknown" : result.format;
-        double confidence = result == null ? 0.0 : result.confidence;
-        return "format=" + format
-                + ", confidence=" + String.format(Locale.ROOT, "%.2f", confidence)
-                + ", size=" + size;
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
-        // - 격리 사유를 남겨야 재처리 판단 기준을 명확히 유지할 수 있다.
-        // - 같은 입력이 반복될 때도 동일한 이유로 처리할 수 있도록 한다.
-        String summary = buildProcessSummary(result, payload);
-        if (payload == null || payload.trim().isEmpty()) {
-            return ValidationResult.quarantine("EMPTY_PAYLOAD", summary);
-        }
-        if ("json".equals(result.format) && !looksLikeJson(payload.trim())) {
-            return ValidationResult.quarantine("INVALID_JSON", summary);
-        }
-        if (result.confidence < 0.5) {
-            return ValidationResult.quarantine("LOW_CONFIDENCE", summary);
-        }
-        if (result.confidence < 0.7) {
-            return ValidationResult.hold("LOW_CONFIDENCE_HOLD", summary);
-        }
-        return ValidationResult.approved("APPROVED", summary);
-    }
-
-    // 목적: 재처리/격리 기록에 쓸 요약 정보를 만든다.
-    // 이유: 운영자가 빠르게 상황을 판단할 수 있도록 최소 정보를 묶어 제공하기 위함이다.
-    private String buildProcessSummary(ClassificationResult result, String payload) {
-        int size = payload == null ? 0 : payload.length();
-        String format = result == null ? "unknown" : result.format;
-        double confidence = result == null ? 0.0 : result.confidence;
-        String type = result == null ? "unknown" : result.eventType;
-        return "format=" + format
-                + ", type=" + type
-                + ", confidence=" + String.format(Locale.ROOT, "%.2f", confidence)
-                + ", size=" + size;
->>>>>>> Stashed changes
-    }
-
     private enum ValidationDecision {
         APPROVED,
         HOLD,
         QUARANTINE
     }
 
-<<<<<<< Updated upstream
-    // 목적: 검증 결과와 사유를 함께 보관한다.
-    // 이유: 격리 기준을 투명하게 유지해야 재처리 기준을 맞출 수 있다.
-    private static final class ValidationResult {
-        private final ValidationDecision decision;
-        private final String reason;
-
-        private ValidationResult(ValidationDecision decision, String reason) {
-            this.decision = decision;
-            this.reason = reason;
-        }
-
-        private static ValidationResult approved(String reason) {
-            return new ValidationResult(ValidationDecision.APPROVED, reason);
-        }
-
-        private static ValidationResult hold(String reason) {
-            return new ValidationResult(ValidationDecision.HOLD, reason);
-        }
-
-        private static ValidationResult quarantine(String reason) {
-            return new ValidationResult(ValidationDecision.QUARANTINE, reason);
-=======
     // 목적: 검증 결과와 사유/요약을 함께 보관한다.
     // 이유: 격리/재처리 이력에서 동일 기준으로 판단하기 위함이다.
     public static final class ValidationResult {
@@ -507,7 +422,6 @@ public class RawPipelineService {
 
         private static ValidationResult quarantine(String reason, String summary) {
             return new ValidationResult(ValidationDecision.QUARANTINE, reason, summary);
->>>>>>> Stashed changes
         }
     }
 

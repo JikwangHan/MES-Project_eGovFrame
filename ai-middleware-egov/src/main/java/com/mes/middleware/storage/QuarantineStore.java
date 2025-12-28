@@ -5,16 +5,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.OffsetDateTime;
-<<<<<<< Updated upstream
-=======
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
->>>>>>> Stashed changes
 
 import org.springframework.stereotype.Service;
 
@@ -39,58 +36,11 @@ public class QuarantineStore {
     // 이유: 자동 파싱 실패 시 원본을 안전하게 보관하기 위함이다.
     // 입력: rawId(원본 식별자), payload(원본 문자열), reason(격리 사유), summary(요약).
     // 출력: 없음(파일 저장).
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-    public void save(String rawId, String payload, String reason) {
-=======
     public void save(String rawId, String payload, String reason, String summary) {
->>>>>>> Stashed changes
-=======
-    public void save(String rawId, String payload, String reason, String summary) {
->>>>>>> Stashed changes
-=======
-    public void save(String rawId, String payload, String reason, String summary) {
->>>>>>> Stashed changes
         try {
             Path dir = Paths.get(QUARANTINE_DIR);
             Files.createDirectories(dir);
             Path file = dir.resolve(rawId + ".raw");
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-            Files.writeString(file, payload == null ? "" : payload, StandardCharsets.UTF_8);
-            // 목적: 격리 사유를 메타 파일로 보관한다.
-            // 이유: 사유가 있어야 후속 재처리 기준을 빠르게 합의할 수 있다.
-            Path meta = dir.resolve(rawId + ".meta.json");
-            String safeReason = reason == null ? "" : reason.replace("\"", "\\\"");
-            String json = "{"
-                    + "\"rawId\":\"" + rawId + "\","
-                    + "\"reason\":\"" + safeReason + "\","
-=======
-=======
->>>>>>> Stashed changes
-            String safePayload = payload == null ? "" : payload;
-            Files.writeString(file, safePayload, StandardCharsets.UTF_8);
-            // 목적: 격리 사유/요약/시간을 메타 파일로 보관한다.
-            // 이유: 재처리 기준을 빠르게 합의할 수 있도록 최소 정보를 남기기 위함이다.
-            Path meta = dir.resolve(rawId + ".meta.json");
-            String safeReason = escape(reason);
-            String safeSummary = escape(summary);
-            int payloadSize = safePayload.length();
-            String json = "{"
-                    + "\"rawId\":\"" + rawId + "\","
-                    + "\"reason\":\"" + safeReason + "\","
-                    + "\"summary\":\"" + safeSummary + "\","
-                    + "\"payloadSize\":" + payloadSize + ","
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-                    + "\"quarantinedAt\":\"" + OffsetDateTime.now().toString() + "\""
-                    + "}";
-            Files.writeString(meta, json, StandardCharsets.UTF_8);
-=======
             String safePayload = payload == null ? "" : payload;
             Files.writeString(file, safePayload, StandardCharsets.UTF_8);
             // 목적: 격리 메타 정보를 저장한다.
@@ -103,21 +53,11 @@ public class QuarantineStore {
             meta.payloadSize = safePayload.length();
             meta.quarantinedAt = OffsetDateTime.now().toString();
             writeMeta(dir.resolve(rawId + ".meta.json"), meta);
->>>>>>> Stashed changes
         } catch (IOException ex) {
             // 격리 실패 시에도 업링크 처리는 유지한다.
         }
     }
 
-<<<<<<< Updated upstream
-    // 목적: 메타 JSON에 안전하게 들어가도록 이스케이프 처리한다.
-    // 이유: 따옴표/역슬래시가 포함되면 JSON이 깨질 수 있기 때문이다.
-    private String escape(String value) {
-        if (value == null) {
-            return "";
-        }
-        return value.replace("\\", "\\\\").replace("\"", "\\\"");
-=======
     // 목적: 격리 원본을 로드한다.
     // 이유: 재처리 요청 시 원본을 다시 파이프라인에 넣어야 하기 때문이다.
     public String loadPayload(String rawId) {
@@ -212,6 +152,8 @@ public class QuarantineStore {
         return result;
     }
 
+    // 목적: 키워드 포함 여부를 단순 판별한다.
+    // 이유: 최소 필터링만 제공해 후보를 좁히기 위함이다.
     private boolean matchContains(String value, String keyword) {
         if (keyword == null || keyword.isBlank()) {
             return true;
@@ -221,6 +163,8 @@ public class QuarantineStore {
         return left.contains(right);
     }
 
+    // 목적: 격리 시각이 요청 기간 범위 안인지 확인한다.
+    // 이유: 기간 필터가 최소 기준으로 동작해야 하기 때문이다.
     private boolean matchDate(String isoTime, LocalDate from, LocalDate to) {
         if (from == null && to == null) {
             return true;
@@ -240,6 +184,8 @@ public class QuarantineStore {
         }
     }
 
+    // 목적: 날짜 문자열을 파싱한다.
+    // 이유: YYYY-MM-DD 형식을 기준으로 처리하기 위함이다.
     private LocalDate parseDate(String value) {
         if (value == null || value.isBlank()) {
             return null;
@@ -282,6 +228,5 @@ public class QuarantineStore {
         public String lastResult;
         public String lastSummary;
         public String lastReprocessedAt;
->>>>>>> Stashed changes
     }
 }
