@@ -12,7 +12,7 @@ public class GatewayApp {
         if (!parsed.isValid()) {
             // 입력 인자 오류는 즉시 FAIL로 종료한다.
             // 이유: 잘못된 입력을 묵인하면 이후 단계에서 원인 추적이 어려워진다.
-            PassFailLog.fail("gateway args invalid");
+            PassFailLog.fail("gateway args invalid REASON=" + GatewayLogReason.INVALID_ARGS);
             System.exit(1);
         }
 

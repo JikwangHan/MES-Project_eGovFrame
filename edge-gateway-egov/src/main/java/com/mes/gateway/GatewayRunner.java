@@ -23,7 +23,8 @@ public class GatewayRunner {
             if (uplink.isSuccess()) {
                 PassFailLog.pass("gateway uplink " + uplink.getStatusCode());
             } else {
-                PassFailLog.fail("gateway uplink " + uplink.getStatusCode());
+                PassFailLog.fail("gateway uplink STATUS=" + uplink.getStatusCode()
+                        + " REASON=" + uplink.getReason());
                 success = false;
             }
         }
@@ -31,11 +32,12 @@ public class GatewayRunner {
         if (args.getMode().includesDownlink()) {
             DownlinkResult downlink = new DownlinkFlow(args).execute();
             if (downlink.isSkipped()) {
-                PassFailLog.skip("gateway downlink");
+                PassFailLog.skip("gateway downlink REASON=" + downlink.getReason());
             } else if (downlink.isSuccess()) {
                 PassFailLog.pass("gateway downlink " + downlink.getStatusCode());
             } else {
-                PassFailLog.fail("gateway downlink " + downlink.getStatusCode());
+                PassFailLog.fail("gateway downlink STATUS=" + downlink.getStatusCode()
+                        + " REASON=" + downlink.getReason());
                 success = false;
             }
         }
