@@ -79,9 +79,9 @@ public final class UiPageTemplate {
         // -------------------------------------------------------------
         // 요약 카드 영역(대시보드 느낌을 주기 위한 자리표시자).
         html.append("<div class=\"summary\">");
-        html.append("<div class=\"box\">요약 카드 1(데이터 준비 중)</div>");
-        html.append("<div class=\"box\">요약 카드 2(데이터 준비 중)</div>");
-        html.append("<div class=\"box\">요약 카드 3(데이터 준비 중)</div>");
+        html.append("<div class=\"box\" id=\"dash-summary-ok\">정상: -</div>");
+        html.append("<div class=\"box\" id=\"dash-summary-warning\">경고: -</div>");
+        html.append("<div class=\"box\" id=\"dash-summary-never\">미수집: -</div>");
         html.append("</div>");
         // 상단 공지/상태 배너 영역.
         html.append("<div class=\"card\" id=\"status-banner\" style=\"margin-bottom:16px;background:#fef3c7;\">");
@@ -459,7 +459,11 @@ public final class UiPageTemplate {
         }
         if ("/ui/kpi".equals(currentPath) || "/ui/orders".equals(currentPath)
             || "/ui/jobs".equals(currentPath) || "/ui/equipment".equals(currentPath)
+<<<<<<< Updated upstream
             || "/ui/external-sync/logs".equals(currentPath)) {
+=======
+            || "/ui/dashboard/production".equals(currentPath)) {
+>>>>>>> Stashed changes
             // -------------------------------------------------------------
             // 공통 스크립트 영역
             // 목적: 테이블 채우기/검증/메시지 처리 등 공통 JS 유틸을 제공한다.
@@ -703,8 +707,36 @@ public final class UiPageTemplate {
             html.append("var banner=document.getElementById(\"status-banner-msg\");");
             html.append("if(banner){banner.textContent=text;}");
             html.append("}");
+            // 대시보드 요약 카드 값을 안전하게 채운다.
+            // 이유: 응답이 비어 있어도 화면이 깨지지 않도록 하기 위함이다.
+            html.append("function setDashText(id,label,value){");
+            html.append("var el=document.getElementById(id);");
+            html.append("if(!el){return;}");
+            html.append("var safe=(value===null||value===undefined)?\"-\":value;");
+            html.append("el.textContent=label+\": \"+safe;");
+            html.append("}");
             html.append("function nowStamp(){");
             html.append("return (new Date()).toLocaleString();");
+            html.append("}");
+            // 대시보드 요약 조회
+            // 목적: 홈(메인) 화면 요약 카드를 API 데이터로 채운다.
+            // 이유: 집계 로직 준비 전에도 화면 흐름을 검증해야 한다.
+            html.append("if(document.getElementById(\"dash-summary-ok\")){");
+            html.append("fetchJson(\"/api/dashboard/summary\",function(res){");
+            html.append("var data=(res&&res.data)||{};");
+            html.append("setDashText(\"dash-summary-ok\",\"정상\",data.okCount);");
+            html.append("setDashText(\"dash-summary-warning\",\"경고\",data.warningCount);");
+            html.append("setDashText(\"dash-summary-never\",\"미수집\",data.neverCount);");
+            html.append("var warn=Number(data.warningCount||0);");
+            html.append("var never=Number(data.neverCount||0);");
+            html.append("if(warn>0||never>0){");
+            html.append("setBannerMessage(\"주의: 경고/미수집 상태가 있습니다.\");");
+            html.append("}else{");
+            html.append("setBannerMessage(\"시스템 상태 정상(임시)\");");
+            html.append("}");
+            html.append("},function(err){");
+            html.append("setBannerMessage(\"대시보드 요약 조회 실패\");");
+            html.append("});");
             html.append("}");
             html.append("var syncHistory=[];");
             html.append("var syncHistoryRows=[];");

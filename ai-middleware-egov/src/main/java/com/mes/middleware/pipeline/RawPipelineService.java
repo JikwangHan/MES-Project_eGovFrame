@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import com.mes.common.logging.PassFailLog;
 import com.mes.middleware.storage.NormalizedStore;
 import com.mes.middleware.storage.QuarantineStore;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,19 +31,20 @@ public class RawPipelineService {
     // 이유: P1 단계에서 자동 식별/파싱의 최소 동작 경로를 확보하기 위함이다.
     // 입력: rawId(원본 식별자), payload(원본 문자열).
     // 출력: 없음(저장소에 저장 + 로그만 남김).
-    public void process(String rawId, String payload) {
+    public ValidationResult process(String rawId, String payload) {
         String safePayload = payload == null ? "" : payload;
         ClassificationResult result = classify(safePayload);
-        ValidationDecision decision = validate(result, safePayload);
-        if (decision == ValidationDecision.QUARANTINE) {
-            quarantineStore.save(rawId, safePayload);
+        ValidationResult decision = validate(result, safePayload);
+        if (decision.decision == ValidationDecision.QUARANTINE) {
+            quarantineStore.save(rawId, safePayload, decision.reason, decision.summary);
             PassFailLog.skip("quarantine " + rawId);
-            return;
+            return decision;
         }
         NormalizedStore.NormalizedRecord record = buildRecord(rawId, safePayload, result);
-        record.validationStatus = decision.name();
+        record.validationStatus = decision.decision.name();
         normalizedStore.save(record);
         PassFailLog.pass("normalized " + rawId);
+        return decision;
     }
 
     // 목적: 데이터 형식을 추정한다.
@@ -142,26 +144,69 @@ public class RawPipelineService {
 
     // 목적: 분류 결과와 payload를 검증해 승인/보류/격리를 결정한다.
     // 이유: 자동 적재 전에 기본 품질을 확인해야 데이터 오염을 줄일 수 있다.
-    private ValidationDecision validate(ClassificationResult result, String payload) {
+    private ValidationResult validate(ClassificationResult result, String payload) {
+        // 초보자 설명:
+        // - 격리 사유를 남겨야 재처리 판단 기준을 명확히 유지할 수 있다.
+        // - 같은 입력이 반복될 때도 동일한 이유로 처리할 수 있도록 한다.
+        String summary = buildProcessSummary(result, payload);
         if (payload == null || payload.trim().isEmpty()) {
-            return ValidationDecision.QUARANTINE;
+            return ValidationResult.quarantine("EMPTY_PAYLOAD", summary);
         }
         if ("json".equals(result.format) && !looksLikeJson(payload.trim())) {
-            return ValidationDecision.QUARANTINE;
+            return ValidationResult.quarantine("INVALID_JSON", summary);
         }
         if (result.confidence < 0.5) {
-            return ValidationDecision.QUARANTINE;
+            return ValidationResult.quarantine("LOW_CONFIDENCE", summary);
         }
         if (result.confidence < 0.7) {
-            return ValidationDecision.HOLD;
+            return ValidationResult.hold("LOW_CONFIDENCE_HOLD", summary);
         }
-        return ValidationDecision.APPROVED;
+        return ValidationResult.approved("APPROVED", summary);
+    }
+
+    // 목적: 재처리/격리 기록에 쓸 요약 정보를 만든다.
+    // 이유: 운영자가 빠르게 상황을 판단할 수 있도록 최소 정보를 묶어 제공하기 위함이다.
+    private String buildProcessSummary(ClassificationResult result, String payload) {
+        int size = payload == null ? 0 : payload.length();
+        String format = result == null ? "unknown" : result.format;
+        double confidence = result == null ? 0.0 : result.confidence;
+        String type = result == null ? "unknown" : result.eventType;
+        return "format=" + format
+                + ", type=" + type
+                + ", confidence=" + String.format(Locale.ROOT, "%.2f", confidence)
+                + ", size=" + size;
     }
 
     private enum ValidationDecision {
         APPROVED,
         HOLD,
         QUARANTINE
+    }
+
+    // 목적: 검증 결과와 사유/요약을 함께 보관한다.
+    // 이유: 격리/재처리 이력에서 동일 기준으로 판단하기 위함이다.
+    public static final class ValidationResult {
+        public final ValidationDecision decision;
+        public final String reason;
+        public final String summary;
+
+        private ValidationResult(ValidationDecision decision, String reason, String summary) {
+            this.decision = decision;
+            this.reason = reason;
+            this.summary = summary;
+        }
+
+        private static ValidationResult approved(String reason, String summary) {
+            return new ValidationResult(ValidationDecision.APPROVED, reason, summary);
+        }
+
+        private static ValidationResult hold(String reason, String summary) {
+            return new ValidationResult(ValidationDecision.HOLD, reason, summary);
+        }
+
+        private static ValidationResult quarantine(String reason, String summary) {
+            return new ValidationResult(ValidationDecision.QUARANTINE, reason, summary);
+        }
     }
 
     public static final class ClassificationResult {
