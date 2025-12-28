@@ -170,10 +170,7 @@ public final class UiPageTemplate {
             html.append("</select></div>");
             html.append("<div><div style=\"font-size:12px;color:#6b7280;\">메시지 키워드</div><input id=\"sync-keyword\" placeholder=\"키워드\" style=\"padding:6px;width:100%;\" /></div>");
             html.append("</div>");
-<<<<<<< Updated upstream
-=======
             // 빠른 기간 버튼은 사용자가 기간 입력을 반복하지 않도록 돕는다.
->>>>>>> Stashed changes
             html.append("<div class=\"action-bar\" style=\"margin-top:8px;\">");
             html.append("<button class=\"btn\" id=\"sync-range-today\">오늘</button>");
             html.append("<button class=\"btn\" id=\"sync-range-7\">최근 7일</button>");
@@ -1187,10 +1184,7 @@ public final class UiPageTemplate {
             html.append("if(count===undefined||count===null){el.textContent=\"조회 결과: -\";return;}");
             html.append("el.textContent=\"조회 결과: \"+count+\"건\";");
             html.append("}");
-<<<<<<< Updated upstream
-=======
             // 화면 입력 상태가 바뀌면 즉시 검증과 요약을 갱신한다.
->>>>>>> Stashed changes
             html.append("function syncUpdateState(){");
             html.append("var msg=syncValidate();");
             html.append("syncSetWarning(msg);");
@@ -1218,10 +1212,7 @@ public final class UiPageTemplate {
             html.append("document.getElementById(\"sync-to\").value=\"\";");
             html.append("syncUpdateState();");
             html.append("}");
-<<<<<<< Updated upstream
-=======
             // 임시 데이터라도 표 구조를 확인할 수 있도록 조회 결과 샘플을 만든다.
->>>>>>> Stashed changes
             html.append("function buildSyncRows(params){");
             html.append("var rows=[];");
             html.append("var baseStatus=params.status||\"ACCEPTED\";");
