@@ -66,6 +66,7 @@ public class ApiController {
     private final List<Map<String, Object>> orderStore = Collections.synchronizedList(new ArrayList<>());
     private final List<Map<String, Object>> jobStore = Collections.synchronizedList(new ArrayList<>());
     private final List<Map<String, Object>> kpiStore = Collections.synchronizedList(new ArrayList<>());
+    private final List<Map<String, Object>> externalSyncStore = Collections.synchronizedList(new ArrayList<>());
 
     // 목적: 임시 식별자 생성 규칙을 고정한다.
     // 이유: 자동 생성된 ID가 중복되지 않도록 보장해야 한다.
@@ -149,6 +150,50 @@ public class ApiController {
         data.put("status", "ACCEPTED");
         data.put("acceptedAt", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         return ResponseEntity.ok(ok(data));
+    }
+
+    // 외부기관 연계 이력 조회.
+    // 목적: 연계 요청 이력을 화면 필터와 연결해 조회한다.
+    // 이유: API 계약이 확정되기 전에도 조회 흐름을 검증해야 한다.
+    // 입력: requestId/agency/from/to/status/keyword/limit(선택).
+    // 출력: 공통 응답 포맷 + 이력 리스트.
+    @GetMapping("/api/external-sync/logs")
+    public ResponseEntity<Map<String, Object>> externalSyncLogs(
+            @RequestParam(name = "requestId", required = false) String requestId,
+            @RequestParam(name = "agency", required = false) String agency,
+            @RequestParam(name = "from", required = false) String from,
+            @RequestParam(name = "to", required = false) String to,
+            @RequestParam(name = "status", required = false) String status,
+            @RequestParam(name = "keyword", required = false) String keyword,
+            @RequestParam(name = "limit", required = false, defaultValue = "20") int limit) {
+        // 초보자 설명:
+        // - 조회 조건이 잘못되면 서버가 먼저 알려줘야 화면이 안정적으로 동작한다.
+        // - 날짜/상태/limit 검증을 여기서 처리한다.
+        if (!isValidLimit(limit)) {
+            return badRequest("E-0001", "limit out of range");
+        }
+        boolean hasFrom = (from != null && !from.isBlank());
+        boolean hasTo = (to != null && !to.isBlank());
+        if (hasFrom ^ hasTo) {
+            return badRequest("E-1001", "invalid date format");
+        }
+        if (hasFrom || hasTo) {
+            if (!isValidDate(from) || !isValidDate(to)) {
+                return badRequest("E-1001", "invalid date format");
+            }
+            if (!isValidDateRange(from, to)) {
+                return badRequest("E-1003", "invalid date range");
+            }
+        }
+        if (status != null && !status.isBlank() && !isValidSyncStatus(status)) {
+            return badRequest("E-1002", "invalid status");
+        }
+
+        List<Map<String, Object>> list = ensureExternalSyncStore();
+        list = filterExternalSyncLogs(list, requestId, agency, from, to, status, keyword);
+        list = limitList(list, limit);
+
+        return ResponseEntity.ok(ok(list));
     }
 
     // 장비 목록 조회.
@@ -1310,6 +1355,16 @@ public class ApiController {
         return "OK".equals(upper) || "WARNING".equals(upper) || "NEVER".equals(upper);
     }
 
+    // 연계 상태 값 검증.
+    // 이유: 외부기관 연계 조회는 ACCEPTED/FAILED만 허용한다.
+    private boolean isValidSyncStatus(String status) {
+        if (status == null || status.isBlank()) {
+            return true;
+        }
+        String upper = status.toUpperCase();
+        return "ACCEPTED".equals(upper) || "FAILED".equals(upper);
+    }
+
     // 날짜 형식(YYYY-MM-DD)만 허용한다.
     // 이유: 검색 조건이 일관된 형식을 갖추어야 비교가 가능하다.
     private boolean isValidDate(String value) {
@@ -1534,6 +1589,36 @@ public class ApiController {
         return kpiStore;
     }
 
+    // 외부기관 연계 이력 저장소 초기화.
+    // 이유: DB가 없어도 조회 화면 흐름을 검증해야 하기 때문이다.
+    private List<Map<String, Object>> ensureExternalSyncStore() {
+        if (externalSyncStore.isEmpty()) {
+            List<Map<String, Object>> list = sampleList("samples/external-sync-logs.json");
+            if (list == null || list.isEmpty()) {
+                list = new ArrayList<>();
+                Map<String, Object> item = new LinkedHashMap<>();
+                item.put("time", "2025-12-24T09:10:00");
+                item.put("requestId", "SYNC-001");
+                item.put("status", "ACCEPTED");
+                item.put("acceptedAt", "2025-12-24T09:10:30");
+                item.put("message", "sample accepted");
+                item.put("agency", "AgencyA");
+                list.add(item);
+
+                Map<String, Object> item2 = new LinkedHashMap<>();
+                item2.put("time", "2025-12-23T16:40:00");
+                item2.put("requestId", "SYNC-002");
+                item2.put("status", "FAILED");
+                item2.put("acceptedAt", "");
+                item2.put("message", "sample failed");
+                item2.put("agency", "AgencyB");
+                list.add(item2);
+            }
+            externalSyncStore.addAll(list);
+        }
+        return externalSyncStore;
+    }
+
     // 단일 키 기준으로 항목을 찾는다.
     private Map<String, Object> findByKey(List<Map<String, Object>> list, String key, String value) {
         for (Map<String, Object> item : list) {
@@ -1713,6 +1798,32 @@ public class ApiController {
                 continue;
             }
             if (!matchDateRange(item.get("date"), from, to)) {
+                continue;
+            }
+            filtered.add(item);
+        }
+        return filtered;
+    }
+
+    // 외부기관 연계 이력 필터를 적용한다.
+    // 이유: 화면 필터 값이 API 결과에 반영되는지 확인하기 위함이다.
+    private List<Map<String, Object>> filterExternalSyncLogs(List<Map<String, Object>> list,
+            String requestId, String agency, String from, String to, String status, String keyword) {
+        List<Map<String, Object>> filtered = new ArrayList<>();
+        for (Map<String, Object> item : list) {
+            if (!matchContains(item.get("requestId"), requestId)) {
+                continue;
+            }
+            if (!matchContains(item.get("agency"), agency)) {
+                continue;
+            }
+            if (!matchDateRange(item.get("time"), from, to)) {
+                continue;
+            }
+            if (!matchEquals(item.get("status"), status)) {
+                continue;
+            }
+            if (!matchContains(item.get("message"), keyword)) {
                 continue;
             }
             filtered.add(item);
