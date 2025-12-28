@@ -155,19 +155,38 @@ public final class UiPageTemplate {
             // 외부기관 연계 이력 조회 화면: 필터 입력과 표 구조를 제공한다.
             // 초보자 설명:
             // - 아직 DB/API가 없더라도 화면에서 입력/검증 흐름을 확인한다.
+            // - 요청 ID/기관명/키워드/빠른 기간 버튼을 추가해 조회 기준을 명확히 한다.
             html.append("<div class=\"card\" style=\"margin-bottom:16px;\">");
-            html.append("<strong>연계 이력 조회(초안)</strong>");
-            html.append("<div style=\"display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;\">");
-            html.append("<input id=\"sync-from\" placeholder=\"기간 시작(YYYY-MM-DD)\" style=\"padding:6px;\" />");
-            html.append("<input id=\"sync-to\" placeholder=\"기간 종료(YYYY-MM-DD)\" style=\"padding:6px;\" />");
-            html.append("<input id=\"sync-status\" placeholder=\"상태(ACCEPTED/FAILED)\" style=\"padding:6px;\" />");
-            html.append("<button id=\"sync-search\" style=\"padding:6px 10px;\">조회</button>");
-            html.append("<button id=\"sync-reset\" style=\"padding:6px 10px;\">초기화</button>");
+            html.append("<strong>연계 이력 조회(고도화)</strong>");
+            html.append("<div style=\"display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin-top:8px;\">");
+            html.append("<div><div style=\"font-size:12px;color:#6b7280;\">요청 ID</div><input id=\"sync-request-id\" placeholder=\"요청ID\" style=\"padding:6px;width:100%;\" /></div>");
+            html.append("<div><div style=\"font-size:12px;color:#6b7280;\">기관명</div><input id=\"sync-agency\" placeholder=\"기관명\" style=\"padding:6px;width:100%;\" /></div>");
+            html.append("<div><div style=\"font-size:12px;color:#6b7280;\">기간 시작</div><input id=\"sync-from\" placeholder=\"YYYY-MM-DD\" style=\"padding:6px;width:100%;\" /></div>");
+            html.append("<div><div style=\"font-size:12px;color:#6b7280;\">기간 종료</div><input id=\"sync-to\" placeholder=\"YYYY-MM-DD\" style=\"padding:6px;width:100%;\" /></div>");
+            html.append("<div><div style=\"font-size:12px;color:#6b7280;\">상태</div><select id=\"sync-status\" style=\"padding:6px;width:100%;\">");
+            html.append("<option value=\"\">전체</option>");
+            html.append("<option value=\"ACCEPTED\">ACCEPTED</option>");
+            html.append("<option value=\"FAILED\">FAILED</option>");
+            html.append("</select></div>");
+            html.append("<div><div style=\"font-size:12px;color:#6b7280;\">메시지 키워드</div><input id=\"sync-keyword\" placeholder=\"키워드\" style=\"padding:6px;width:100%;\" /></div>");
+            html.append("</div>");
+            // 빠른 기간 버튼은 사용자가 기간 입력을 반복하지 않도록 돕는다.
+            html.append("<div class=\"action-bar\" style=\"margin-top:8px;\">");
+            html.append("<button class=\"btn\" id=\"sync-range-today\">오늘</button>");
+            html.append("<button class=\"btn\" id=\"sync-range-7\">최근 7일</button>");
+            html.append("<button class=\"btn\" id=\"sync-range-30\">최근 30일</button>");
+            html.append("<button class=\"btn\" id=\"sync-clear\">전체기간</button>");
+            html.append("<button class=\"btn primary\" id=\"sync-search\">조회</button>");
+            html.append("<button class=\"btn\" id=\"sync-reset\">초기화</button>");
             html.append("</div>");
             html.append("<div id=\"sync-warning\" style=\"margin-top:8px;color:#b91c1c;\"></div>");
+            html.append("<p style=\"margin-top:8px;color:#6b7280;\">날짜는 YYYY-MM-DD 형식으로 입력합니다. 기간은 시작/종료를 함께 입력합니다.</p>");
+            html.append("<div id=\"sync-summary\" style=\"margin-top:6px;color:#6b7280;\"></div>");
             html.append("</div>");
+            // 결과 요약은 조회 건수를 빠르게 확인하도록 제공한다.
             html.append("<div class=\"card\" style=\"margin-bottom:16px;\">");
             html.append("<strong>연계 이력 목록(임시)</strong>");
+            html.append("<div id=\"sync-result-summary\" style=\"margin-top:6px;color:#6b7280;\"></div>");
             html.append("<table style=\"width:100%;border-collapse:collapse;margin-top:8px;\">");
             html.append("<thead><tr>");
             html.append("<th style=\"border-bottom:1px solid #ddd;text-align:left;\">시간</th>");
@@ -177,7 +196,7 @@ public final class UiPageTemplate {
             html.append("<th style=\"border-bottom:1px solid #ddd;text-align:left;\">메시지</th>");
             html.append("</tr></thead>");
             html.append("<tbody id=\"sync-log-body\">");
-            html.append("<tr><td colspan=\"5\" style=\"padding:4px 0;\">데이터 로딩 중...</td></tr>");
+            html.append("<tr><td colspan=\"5\" style=\"padding:4px 0;\">조회 대기</td></tr>");
             html.append("</tbody>");
             html.append("</table>");
             html.append("</div>");
@@ -400,7 +419,8 @@ public final class UiPageTemplate {
             html.append("</div>");
         }
         if ("/ui/kpi".equals(currentPath) || "/ui/orders".equals(currentPath)
-            || "/ui/jobs".equals(currentPath) || "/ui/equipment".equals(currentPath)) {
+            || "/ui/jobs".equals(currentPath) || "/ui/equipment".equals(currentPath)
+            || "/ui/external-sync/logs".equals(currentPath)) {
             // -------------------------------------------------------------
             // 공통 스크립트 영역
             // 목적: 테이블 채우기/검증/메시지 처리 등 공통 JS 유틸을 제공한다.
@@ -513,6 +533,7 @@ public final class UiPageTemplate {
             html.append("var map={");
             html.append("orderId:\"수주번호\",partnerName:\"거래처명\",dueFrom:\"납기일 시작\",dueTo:\"납기일 종료\",status:\"상태\",");
             html.append("jobId:\"작업 ID\",processName:\"공정명\",from:\"기간 시작\",to:\"기간 종료\",");
+            html.append("requestId:\"요청ID\",agency:\"기관명\",keyword:\"메시지\",");
             html.append("name:\"KPI명\",kpiId:\"KPI ID\"");
             html.append("};");
             html.append("return map[key]||key;");
@@ -538,7 +559,7 @@ public final class UiPageTemplate {
             html.append("if(v){cleaned[k]=v;}");
             html.append("});");
             html.append("var keys=Object.keys(cleaned);");
-            html.append("var order=[\"orderId\",\"partnerName\",\"dueFrom\",\"dueTo\",\"status\",\"jobId\",\"processName\",\"from\",\"to\",\"name\",\"kpiId\"];");
+            html.append("var order=[\"orderId\",\"partnerName\",\"dueFrom\",\"dueTo\",\"status\",\"jobId\",\"processName\",\"from\",\"to\",\"requestId\",\"agency\",\"keyword\",\"name\",\"kpiId\"];");
             html.append("keys.sort(function(a,b){");
             html.append("var ia=order.indexOf(a);");
             html.append("var ib=order.indexOf(b);");
@@ -1124,13 +1145,29 @@ public final class UiPageTemplate {
             html.append("setWarning(\"kpi-warning\",err);");
             html.append("});");
             html.append("}");
+            // 연계 이력 조회는 입력 검증, 빠른 기간 버튼, 결과 요약을 함께 제공한다.
             html.append("if(document.getElementById(\"sync-log-body\")){");
             html.append("var syncSearch=document.getElementById(\"sync-search\");");
             html.append("var syncReset=document.getElementById(\"sync-reset\");");
+            html.append("var syncClear=document.getElementById(\"sync-clear\");");
+            html.append("var syncRangeToday=document.getElementById(\"sync-range-today\");");
+            html.append("var syncRange7=document.getElementById(\"sync-range-7\");");
+            html.append("var syncRange30=document.getElementById(\"sync-range-30\");");
+            html.append("function syncParams(){");
+            html.append("return {");
+            html.append("requestId:document.getElementById(\"sync-request-id\").value,");
+            html.append("agency:document.getElementById(\"sync-agency\").value,");
+            html.append("from:document.getElementById(\"sync-from\").value,");
+            html.append("to:document.getElementById(\"sync-to\").value,");
+            html.append("status:document.getElementById(\"sync-status\").value,");
+            html.append("keyword:document.getElementById(\"sync-keyword\").value");
+            html.append("};");
+            html.append("}");
             html.append("function syncValidate(){");
-            html.append("var from=document.getElementById(\"sync-from\").value;");
-            html.append("var to=document.getElementById(\"sync-to\").value;");
-            html.append("var status=document.getElementById(\"sync-status\").value;");
+            html.append("var params=syncParams();");
+            html.append("var from=params.from;");
+            html.append("var to=params.to;");
+            html.append("var status=params.status;");
             html.append("if((from&&!to)||(!from&&to)){return \"기간 시작/종료는 함께 입력해야 합니다.\";}");
             html.append("if(!isValidDate(from)||!isValidDate(to)){return \"날짜 형식이 올바르지 않습니다. YYYY-MM-DD로 입력하세요.\";}");
             html.append("if(!isValidDateRange(from,to)){return \"기간 시작이 종료보다 늦을 수 없습니다.\";}");
@@ -1141,22 +1178,98 @@ public final class UiPageTemplate {
             html.append("var el=document.getElementById(\"sync-warning\");");
             html.append("if(el){el.textContent=msg||\"\";}");
             html.append("}");
-            html.append("if(syncReset){");
-            html.append("syncReset.addEventListener(\"click\",function(){");
+            html.append("function syncSetResultSummary(count){");
+            html.append("var el=document.getElementById(\"sync-result-summary\");");
+            html.append("if(!el){return;}");
+            html.append("if(count===undefined||count===null){el.textContent=\"조회 결과: -\";return;}");
+            html.append("el.textContent=\"조회 결과: \"+count+\"건\";");
+            html.append("}");
+            // 화면 입력 상태가 바뀌면 즉시 검증과 요약을 갱신한다.
+            html.append("function syncUpdateState(){");
+            html.append("var msg=syncValidate();");
+            html.append("syncSetWarning(msg);");
+            html.append("setDisabled(\"sync-search\",!!msg);");
+            html.append("setInvalid([\"sync-from\",\"sync-to\",\"sync-status\"],!!msg);");
+            html.append("setSummary(\"sync-summary\",syncParams());");
+            html.append("return msg;");
+            html.append("}");
+            html.append("function formatDate(date){");
+            html.append("var y=date.getFullYear();");
+            html.append("var m=String(date.getMonth()+1).padStart(2,\"0\");");
+            html.append("var d=String(date.getDate()).padStart(2,\"0\");");
+            html.append("return y+\"-\"+m+\"-\"+d;");
+            html.append("}");
+            html.append("function applyRange(days){");
+            html.append("var end=new Date();");
+            html.append("var start=new Date();");
+            html.append("start.setDate(end.getDate()-days+1);");
+            html.append("document.getElementById(\"sync-from\").value=formatDate(start);");
+            html.append("document.getElementById(\"sync-to\").value=formatDate(end);");
+            html.append("syncUpdateState();");
+            html.append("}");
+            html.append("function resetRange(){");
             html.append("document.getElementById(\"sync-from\").value=\"\";");
             html.append("document.getElementById(\"sync-to\").value=\"\";");
-            html.append("document.getElementById(\"sync-status\").value=\"\";");
+            html.append("syncUpdateState();");
+            html.append("}");
+            // 임시 데이터라도 표 구조를 확인할 수 있도록 조회 결과 샘플을 만든다.
+            html.append("function buildSyncRows(params){");
+            html.append("var rows=[];");
+            html.append("var baseStatus=params.status||\"ACCEPTED\";");
+            html.append("var req=params.requestId||(\"SYNC-\"+Date.now());");
+            html.append("rows.push({");
+            html.append("time:nowStamp(),");
+            html.append("requestId:req,");
+            html.append("status:baseStatus,");
+            html.append("acceptedAt:baseStatus===\"ACCEPTED\"?nowStamp():\"\",");
+            html.append("message:params.keyword?\"키워드 포함: \"+params.keyword:\"연계 요청 접수(임시)\"");
+            html.append("});");
+            html.append("if(!params.status||params.status===\"FAILED\"){");
+            html.append("rows.push({");
+            html.append("time:nowStamp(),");
+            html.append("requestId:req+\"-R\",");
+            html.append("status:\"FAILED\",");
+            html.append("acceptedAt:\"\",");
+            html.append("message:\"연계 실패(임시)\"");
+            html.append("});");
+            html.append("}");
+            html.append("return rows;");
+            html.append("}");
+            html.append("var syncInputs=[\"sync-request-id\",\"sync-agency\",\"sync-from\",\"sync-to\",\"sync-status\",\"sync-keyword\"];");
+            html.append("syncInputs.forEach(function(id){");
+            html.append("var el=document.getElementById(id);");
+            html.append("if(!el){return;}");
+            html.append("el.addEventListener(\"input\",syncUpdateState);");
+            html.append("el.addEventListener(\"change\",syncUpdateState);");
+            html.append("});");
+            html.append("if(syncRangeToday){syncRangeToday.addEventListener(\"click\",function(){applyRange(1);});}");
+            html.append("if(syncRange7){syncRange7.addEventListener(\"click\",function(){applyRange(7);});}");
+            html.append("if(syncRange30){syncRange30.addEventListener(\"click\",function(){applyRange(30);});}");
+            html.append("if(syncClear){syncClear.addEventListener(\"click\",resetRange);}");
+            html.append("if(syncReset){");
+            html.append("syncReset.addEventListener(\"click\",function(){");
+            html.append("syncInputs.forEach(function(id){");
+            html.append("var el=document.getElementById(id);");
+            html.append("if(el){el.value=\"\";}");
+            html.append("});");
             html.append("syncSetWarning(\"\");");
+            html.append("syncSetResultSummary(null);");
+            html.append("syncUpdateState();");
+            html.append("document.getElementById(\"sync-log-body\").innerHTML=\"<tr><td colspan=\\\"5\\\" style=\\\"padding:4px 0;\\\">조회 대기</td></tr>\";");
             html.append("});");
             html.append("}");
             html.append("if(syncSearch){");
             html.append("syncSearch.addEventListener(\"click\",function(){");
-            html.append("var msg=syncValidate();");
-            html.append("syncSetWarning(msg);");
+            html.append("var msg=syncUpdateState();");
             html.append("if(msg){return;}");
-            html.append("document.getElementById(\"sync-log-body\").innerHTML=\"<tr><td colspan=\\\"5\\\" style=\\\"padding:4px 0;\\\">조회 완료(임시)</td></tr>\";");
+            html.append("var params=syncParams();");
+            html.append("var rows=buildSyncRows(params);");
+            html.append("fillTable(\"sync-log-body\",rows,[\"time\",\"requestId\",\"status\",\"acceptedAt\",\"message\"]);");
+            html.append("syncSetResultSummary(rows.length);");
             html.append("});");
             html.append("}");
+            html.append("syncSetResultSummary(null);");
+            html.append("syncUpdateState();");
             html.append("}");
             html.append("})();");
             html.append("</script>");
