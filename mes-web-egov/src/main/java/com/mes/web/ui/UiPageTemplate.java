@@ -155,6 +155,7 @@ public final class UiPageTemplate {
             // 외부기관 연계 이력 조회 화면: 필터 입력과 표 구조를 제공한다.
             // 초보자 설명:
             // - 아직 DB/API가 없더라도 화면에서 입력/검증 흐름을 확인한다.
+            // - 요청 ID/기관명/키워드/빠른 기간 버튼을 추가해 조회 기준을 명확히 한다.
             html.append("<div class=\"card\" style=\"margin-bottom:16px;\">");
             html.append("<strong>연계 이력 조회(고도화)</strong>");
             html.append("<div style=\"display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin-top:8px;\">");
@@ -169,6 +170,10 @@ public final class UiPageTemplate {
             html.append("</select></div>");
             html.append("<div><div style=\"font-size:12px;color:#6b7280;\">메시지 키워드</div><input id=\"sync-keyword\" placeholder=\"키워드\" style=\"padding:6px;width:100%;\" /></div>");
             html.append("</div>");
+<<<<<<< Updated upstream
+=======
+            // 빠른 기간 버튼은 사용자가 기간 입력을 반복하지 않도록 돕는다.
+>>>>>>> Stashed changes
             html.append("<div class=\"action-bar\" style=\"margin-top:8px;\">");
             html.append("<button class=\"btn\" id=\"sync-range-today\">오늘</button>");
             html.append("<button class=\"btn\" id=\"sync-range-7\">최근 7일</button>");
@@ -181,6 +186,7 @@ public final class UiPageTemplate {
             html.append("<p style=\"margin-top:8px;color:#6b7280;\">날짜는 YYYY-MM-DD 형식으로 입력합니다. 기간은 시작/종료를 함께 입력합니다.</p>");
             html.append("<div id=\"sync-summary\" style=\"margin-top:6px;color:#6b7280;\"></div>");
             html.append("</div>");
+            // 결과 요약은 조회 건수를 빠르게 확인하도록 제공한다.
             html.append("<div class=\"card\" style=\"margin-bottom:16px;\">");
             html.append("<strong>연계 이력 목록(임시)</strong>");
             html.append("<div id=\"sync-result-summary\" style=\"margin-top:6px;color:#6b7280;\"></div>");
@@ -1142,6 +1148,7 @@ public final class UiPageTemplate {
             html.append("setWarning(\"kpi-warning\",err);");
             html.append("});");
             html.append("}");
+            // 연계 이력 조회는 입력 검증, 빠른 기간 버튼, 결과 요약을 함께 제공한다.
             html.append("if(document.getElementById(\"sync-log-body\")){");
             html.append("var syncSearch=document.getElementById(\"sync-search\");");
             html.append("var syncReset=document.getElementById(\"sync-reset\");");
@@ -1180,6 +1187,10 @@ public final class UiPageTemplate {
             html.append("if(count===undefined||count===null){el.textContent=\"조회 결과: -\";return;}");
             html.append("el.textContent=\"조회 결과: \"+count+\"건\";");
             html.append("}");
+<<<<<<< Updated upstream
+=======
+            // 화면 입력 상태가 바뀌면 즉시 검증과 요약을 갱신한다.
+>>>>>>> Stashed changes
             html.append("function syncUpdateState(){");
             html.append("var msg=syncValidate();");
             html.append("syncSetWarning(msg);");
@@ -1207,6 +1218,10 @@ public final class UiPageTemplate {
             html.append("document.getElementById(\"sync-to\").value=\"\";");
             html.append("syncUpdateState();");
             html.append("}");
+<<<<<<< Updated upstream
+=======
+            // 임시 데이터라도 표 구조를 확인할 수 있도록 조회 결과 샘플을 만든다.
+>>>>>>> Stashed changes
             html.append("function buildSyncRows(params){");
             html.append("var rows=[];");
             html.append("var baseStatus=params.status||\"ACCEPTED\";");
