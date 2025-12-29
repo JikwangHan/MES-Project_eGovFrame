@@ -29,7 +29,7 @@ public final class UiPageTemplate {
         html.append("<title>").append(escape(title)).append("</title>");
         // 간단한 기본 스타일(색상/레이아웃)을 정의한다.
         html.append("<style>");
-        html.append("body{font-family:Arial, sans-serif;margin:0;background:#f6f7fb;color:#222;}");
+        html.append("body{font-family:\"Noto Sans KR\",\"Malgun Gothic\",sans-serif;margin:0;background:#f6f7fb;color:#222;}");
         html.append("header{background:#1f2937;color:#fff;padding:12px 20px;}");
         html.append(".wrap{display:flex;min-height:calc(100vh - 48px);}");
         html.append("nav{width:220px;background:#111827;color:#cbd5e1;padding:16px;}");
@@ -45,6 +45,17 @@ public final class UiPageTemplate {
         html.append(".action-bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}");
         html.append(".btn{padding:6px 10px;border-radius:6px;border:1px solid #cbd5e1;background:#f8fafc;cursor:pointer;}");
         html.append(".btn.primary{background:#2563eb;color:#fff;border-color:#2563eb;}");
+        html.append(".home-hero{background:linear-gradient(135deg,#0b47cf,#0a2d78);color:#fff;border-radius:14px;padding:28px;}");
+        html.append(".home-hero-top{display:flex;align-items:center;justify-content:space-between;gap:16px;}");
+        html.append(".home-logo{font-weight:bold;font-size:20px;letter-spacing:1px;}");
+        html.append(".home-links{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;}");
+        html.append(".home-links a{color:#e2e8f0;text-decoration:none;}");
+        html.append(".home-hero-center{margin-top:40px;text-align:center;}");
+        html.append(".home-hero-center h1{margin:0 0 8px 0;font-size:32px;letter-spacing:1px;}");
+        html.append(".home-hero-center h2{margin:0 0 10px 0;font-size:18px;font-weight:normal;color:#dbeafe;}");
+        html.append(".home-hero-center p{margin:0;color:#cbd5f5;font-size:13px;}");
+        html.append(".home-footer{background:#071b3f;color:#a5b4fc;border-radius:0 0 14px 14px;padding:18px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;}");
+        html.append(".home-footer a{color:#93c5fd;text-decoration:none;font-size:12px;}");
         html.append("</style>");
         html.append("</head>");
         html.append("<body>");
@@ -88,6 +99,38 @@ public final class UiPageTemplate {
         html.append("<strong>알림/상태 배너</strong>");
         html.append("<p id=\"status-banner-msg\">시스템 상태/주의 메시지는 후속 단계에서 적용합니다.</p>");
         html.append("</div>");
+        // 홈(메인) 화면은 첨부 이미지 스타일로 구성한다.
+        // 이유: 로그인 영역을 제외한 "소개 + 상단 링크 + 하단 링크" 구성을 그대로 맞추기 위해서다.
+        if ("/ui/dashboard/production".equals(currentPath)) {
+            html.append("<div style=\"margin-bottom:16px;\">");
+            html.append("<div class=\"home-hero\">");
+            html.append("<div class=\"home-hero-top\">");
+            html.append("<div>");
+            html.append("<div class=\"home-logo\">HID</div>");
+            html.append("<div style=\"font-size:11px;color:#cbd5f5;\">Innovations</div>");
+            html.append("</div>");
+            html.append("<div class=\"home-links\">");
+            html.append("<a href=\"/ui/operation\">Operation</a>");
+            html.append("<a href=\"/ui/gear\">Gear Fraction</a>");
+            html.append("<a href=\"/ui/sitemap\">Sitemap</a>");
+            html.append("</div>");
+            html.append("</div>");
+            html.append("<div class=\"home-hero-center\">");
+            html.append("<h1>MES</h1>");
+            html.append("<h2>Manufacturing Execution Systems</h2>");
+            html.append("<p>제조 공정과 운영 효율을 높이는 실행 시스템입니다.</p>");
+            html.append("</div>");
+            html.append("</div>");
+            html.append("<div class=\"home-footer\">");
+            html.append("<div>© 2019 (주)메인페이지</div>");
+            html.append("<div style=\"display:flex;gap:18px;flex-wrap:wrap;\">");
+            html.append("<a href=\"/ui/about\">About Us</a>");
+            html.append("<a href=\"/ui/license\">MIT License</a>");
+            html.append("<span style=\"font-size:12px;color:#93c5fd;\">Quamamua V1.3</span>");
+            html.append("</div>");
+            html.append("</div>");
+            html.append("</div>");
+        }
         // 현재 화면 설명을 노출한다.
         html.append("<div class=\"card\" style=\"margin-bottom:16px;\">");
         html.append("<strong>페이지 설명</strong>");
