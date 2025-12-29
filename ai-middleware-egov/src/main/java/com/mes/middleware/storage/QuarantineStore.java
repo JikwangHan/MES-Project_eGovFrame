@@ -28,6 +28,9 @@ public class QuarantineStore {
     // 목적: 재처리 이력 파일명을 고정한다.
     // 이유: 히스토리를 한 곳에 모아 추적하기 위함이다.
     private static final String REPROCESS_HISTORY = "reprocess-history.jsonl";
+    // 목적: 재시도 실패 사유 이력 파일명을 고정한다.
+    // 이유: 재시도 실패 원인을 한 곳에 모아 추적하기 위함이다.
+    private static final String RETRY_FAILURE_HISTORY = "retry-failure-history.jsonl";
     // 목적: JSON 파싱/저장을 단일 인스턴스로 처리한다.
     // 이유: 반복 생성 비용을 줄이고 일관된 파싱을 유지하기 위함이다.
     private static final ObjectMapper JSON = new ObjectMapper();
@@ -111,6 +114,122 @@ public class QuarantineStore {
             writeMeta(metaPath, meta);
         } catch (IOException ex) {
             // 메타 갱신 실패 시에도 재처리는 계속 진행한다.
+        }
+    }
+
+    // 목적: 승인/거부 결과를 메타 파일에 반영한다.
+    // 이유: 재처리 결과를 승인/거부로 확정해야 통계가 정확해진다.
+    public void updateDecisionStatus(String rawId, String decision, String summary) {
+        try {
+            Path metaPath = Paths.get(QUARANTINE_DIR).resolve(rawId + ".meta.json");
+            QuarantineMeta meta = readMeta(metaPath);
+            if (meta == null) {
+                meta = new QuarantineMeta();
+                meta.rawId = rawId;
+                meta.quarantinedAt = OffsetDateTime.now().toString();
+            }
+            meta.status = safe(decision);
+            meta.lastResult = safe(decision);
+            meta.lastSummary = safe(summary);
+            meta.lastDecisionAt = OffsetDateTime.now().toString();
+            writeMeta(metaPath, meta);
+        } catch (IOException ex) {
+            // 승인/거부 갱신 실패 시에도 흐름은 유지한다.
+        }
+    }
+
+    // 목적: 승인/거부 결과 이력을 기록한다.
+    // 이유: 결과 추적과 통계 근거를 분리해 보관하기 위함이다.
+    public void appendDecisionHistory(String rawId, String decision, String summary) {
+        try {
+            Path dir = Paths.get(QUARANTINE_DIR);
+            Files.createDirectories(dir);
+            Path history = dir.resolve("decision-history.jsonl");
+            String json = "{"
+                    + "\"rawId\":\"" + safe(rawId) + "\","
+                    + "\"decision\":\"" + safe(decision) + "\","
+                    + "\"summary\":\"" + safe(summary) + "\","
+                    + "\"decidedAt\":\"" + OffsetDateTime.now().toString() + "\""
+                    + "}";
+            Files.write(history, List.of(json), StandardCharsets.UTF_8,
+                    Files.exists(history) ? java.nio.file.StandardOpenOption.APPEND
+                                           : java.nio.file.StandardOpenOption.CREATE);
+        } catch (IOException ex) {
+            // 이력 저장 실패 시에도 승인/거부 처리는 유지한다.
+        }
+    }
+
+    // 목적: 승인/거부 통계를 기본 단위로 집계한다.
+    // 이유: 운영자가 최소한의 성과 지표를 확인할 수 있어야 하기 때문이다.
+    public DecisionStats summarizeDecisionStats() {
+        Path dir = Paths.get(QUARANTINE_DIR);
+        if (!Files.exists(dir)) {
+            return new DecisionStats(0, 0);
+        }
+        List<Path> files;
+        try {
+            files = Files.list(dir)
+                    .filter(p -> p.getFileName().toString().endsWith(".meta.json"))
+                    .collect(Collectors.toList());
+        } catch (IOException ex) {
+            return new DecisionStats(0, 0);
+        }
+        int approved = 0;
+        int rejected = 0;
+        for (Path metaPath : files) {
+            QuarantineMeta meta = readMeta(metaPath);
+            if (meta == null || meta.status == null) {
+                continue;
+            }
+            String status = meta.status.toUpperCase(Locale.ROOT);
+            if ("APPROVED".equals(status)) {
+                approved++;
+            } else if ("REJECTED".equals(status)) {
+                rejected++;
+            }
+        }
+        return new DecisionStats(approved, rejected);
+    }
+
+    // 목적: 재시도 실패 사유 이력을 기록한다.
+    // 이유: 실패 사유를 표준 코드로 남겨 재시도 정책을 검증하기 위함이다.
+    public void appendRetryFailureHistory(String rawId, String reasonCode, String summary) {
+        try {
+            Path dir = Paths.get(QUARANTINE_DIR);
+            Files.createDirectories(dir);
+            Path history = dir.resolve(RETRY_FAILURE_HISTORY);
+            String json = "{"
+                    + "\"rawId\":\"" + safe(rawId) + "\","
+                    + "\"reasonCode\":\"" + safe(reasonCode) + "\","
+                    + "\"summary\":\"" + safe(summary) + "\","
+                    + "\"failedAt\":\"" + OffsetDateTime.now().toString() + "\""
+                    + "}";
+            Files.write(history, List.of(json), StandardCharsets.UTF_8,
+                    Files.exists(history) ? java.nio.file.StandardOpenOption.APPEND
+                                           : java.nio.file.StandardOpenOption.CREATE);
+        } catch (IOException ex) {
+            // 실패 사유 저장 실패 시에도 재시도 흐름은 유지한다.
+        }
+    }
+
+    // 목적: 재시도 횟수를 메타에 반영한다.
+    // 이유: 재시도 가능 여부를 판단하는 기준이 되기 때문이다.
+    public void updateRetryStatus(String rawId, int attempt, String reasonCode, String summary) {
+        try {
+            Path metaPath = Paths.get(QUARANTINE_DIR).resolve(rawId + ".meta.json");
+            QuarantineMeta meta = readMeta(metaPath);
+            if (meta == null) {
+                meta = new QuarantineMeta();
+                meta.rawId = rawId;
+                meta.quarantinedAt = OffsetDateTime.now().toString();
+            }
+            meta.retryCount = attempt;
+            meta.lastRetryReason = safe(reasonCode);
+            meta.lastRetrySummary = safe(summary);
+            meta.lastRetryAt = OffsetDateTime.now().toString();
+            writeMeta(metaPath, meta);
+        } catch (IOException ex) {
+            // 재시도 상태 갱신 실패 시에도 흐름은 유지한다.
         }
     }
 
@@ -228,5 +347,22 @@ public class QuarantineStore {
         public String lastResult;
         public String lastSummary;
         public String lastReprocessedAt;
+        public String lastDecisionAt;
+        public int retryCount;
+        public String lastRetryReason;
+        public String lastRetrySummary;
+        public String lastRetryAt;
+    }
+
+    // 목적: 승인/거부 통계 값을 묶어 전달한다.
+    // 이유: API 응답에서 통계를 일관된 구조로 제공하기 위함이다.
+    public static final class DecisionStats {
+        public final int approvedCount;
+        public final int rejectedCount;
+
+        private DecisionStats(int approvedCount, int rejectedCount) {
+            this.approvedCount = approvedCount;
+            this.rejectedCount = rejectedCount;
+        }
     }
 }

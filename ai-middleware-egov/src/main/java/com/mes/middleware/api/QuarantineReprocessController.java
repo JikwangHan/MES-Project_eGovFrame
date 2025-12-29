@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mes.middleware.pipeline.QuarantineReprocessService;
+import com.mes.middleware.pipeline.QuarantineReprocessService.RetryPolicy;
 
 @RestController
 public class QuarantineReprocessController {
@@ -40,6 +41,28 @@ public class QuarantineReprocessController {
         return ResponseEntity.ok(ok(data));
     }
 
+    // 목적: 재시도 정책을 적용해 재처리를 수행한다.
+    // 이유: 재시도 조건(횟수/간격/상태)을 API에서 통제하기 위함이다.
+    @PostMapping("/api/quarantine/reprocess/retry")
+    public ResponseEntity<Map<String, Object>> retry(@RequestBody Map<String, String> body) {
+        String rawId = body == null ? null : body.get("rawId");
+        int maxAttempts = parseInt(body == null ? null : body.get("maxAttempts"), 1);
+        int intervalSeconds = parseInt(body == null ? null : body.get("intervalSeconds"), 0);
+        boolean canRetry = !"false".equalsIgnoreCase(body == null ? null : body.get("canRetry"));
+        String failReasonCode = body == null ? null : body.get("failReasonCode");
+        RetryPolicy policy = new RetryPolicy(maxAttempts, intervalSeconds, canRetry,
+                failReasonCode == null || failReasonCode.isBlank() ? "RETRY_FAILED" : failReasonCode);
+        QuarantineReprocessService.ReprocessResult result = reprocessService.retry(rawId, policy);
+        if (!result.success) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(fail(result.code, result.reason));
+        }
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("decision", result.decision);
+        data.put("reason", result.reason);
+        data.put("summary", result.summary);
+        return ResponseEntity.ok(ok(data));
+    }
+
     // 공통 성공 응답 포맷.
     private Map<String, Object> ok(Object data) {
         Map<String, Object> res = new LinkedHashMap<>();
@@ -57,5 +80,16 @@ public class QuarantineReprocessController {
         res.put("errorCode", errorCode);
         res.put("data", null);
         return res;
+    }
+
+    private int parseInt(String value, int fallback) {
+        if (value == null || value.isBlank()) {
+            return fallback;
+        }
+        try {
+            return Integer.parseInt(value.trim());
+        } catch (NumberFormatException ex) {
+            return fallback;
+        }
     }
 }
