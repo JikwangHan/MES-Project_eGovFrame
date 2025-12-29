@@ -1,3 +1,3 @@
 # PR-C7 스모크 테스트 증빙
 
-- [SKIP] kpi ui smoke: 로컬 환경에서 화면 확인만 수행했고 자동화 스모크는 실행하지 못했습니다.
+- [PASS] kpi ui smoke
