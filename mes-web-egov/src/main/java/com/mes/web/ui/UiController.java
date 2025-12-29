@@ -1,6 +1,5 @@
 package com.mes.web.ui;
 
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,7 +17,9 @@ public class UiController {
     // 이유: 화면 라우팅과 레이아웃 골격이 준비되었는지 스모크로 빠르게 확인하기 위함이다.
     // 입력: /ui 경로 요청.
     // 출력: 공통 레이아웃 HTML.
-    @GetMapping(value = "/ui", produces = MediaType.TEXT_HTML_VALUE)
+    // 목적: HTML 응답에 UTF-8을 명시해 한글 깨짐을 방지한다.
+    // 이유: 브라우저가 인코딩을 잘못 추정하면 화면 텍스트가 깨질 수 있기 때문이다.
+    @GetMapping(value = "/ui", produces = "text/html; charset=UTF-8")
     public String uiHome() {
         return UiPageTemplate.render(
             "MES UI",

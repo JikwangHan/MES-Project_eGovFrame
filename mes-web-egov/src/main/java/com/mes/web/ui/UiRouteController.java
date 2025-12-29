@@ -2,7 +2,6 @@ package com.mes.web.ui;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,6 +19,8 @@ public class UiRouteController {
     // 이유: 데이터 바인딩 전 단계에서 화면 접근 가능 여부를 스모크로 확인하기 위함이다.
     // 입력: 브라우저가 요청한 경로.
     // 출력: 공통 레이아웃 HTML(현재는 설명/자리표시자 중심).
+    // 목적: HTML 응답에 UTF-8을 명시해 한글 깨짐을 방지한다.
+    // 이유: 브라우저 인코딩 자동 판단이 실패할 수 있기 때문이다.
     @GetMapping(value = {
         "/ui/login",
         "/ui/account/change-password",
@@ -53,7 +54,7 @@ public class UiRouteController {
         "/ui/admin/factories-warehouses",
         "/ui/kpi",
         "/ui/external-sync/logs"
-    }, produces = MediaType.TEXT_HTML_VALUE)
+    }, produces = "text/html; charset=UTF-8")
     public String uiRoute(HttpServletRequest request) {
         // 요청 경로에 맞는 설명을 찾아서 화면에 표시한다.
         String path = request.getRequestURI();
