@@ -29,37 +29,88 @@ public final class UiPageTemplate {
         html.append("<title>").append(escape(title)).append("</title>");
         // 간단한 기본 스타일(색상/레이아웃)을 정의한다.
         html.append("<style>");
-        html.append("body{font-family:\"Noto Sans KR\",\"Malgun Gothic\",sans-serif;margin:0;background:#f6f7fb;color:#222;}");
-        html.append("header{background:#1f2937;color:#fff;padding:12px 20px;}");
+        html.append("body{font-family:\"Noto Sans KR\",\"Pretendard\",system-ui,-apple-system,\"Segoe UI\",sans-serif;margin:0;background:#f5f5f5;color:#1f1f1f;line-height:1.5;}");
+        html.append("header{background:#fff;color:#1f1f1f;padding:0 16px;border-bottom:1px solid #e5e5e5;}");
         html.append(".wrap{display:flex;min-height:calc(100vh - 48px);}");
-        html.append("nav{width:220px;background:#111827;color:#cbd5e1;padding:16px;}");
-        html.append("nav a{display:block;color:#cbd5e1;text-decoration:none;padding:6px 0;}");
-        html.append("nav a.active{color:#fff;font-weight:bold;}");
+        html.append("nav{width:220px;background:#fff;color:#1f1f1f;padding:16px;border-right:1px solid #e5e5e5;}");
+        html.append("nav a{display:block;color:#4b5563;text-decoration:none;padding:6px 0;}");
+        html.append("nav a.active{color:#1f1f1f;font-weight:bold;}");
         html.append("main{flex:1;padding:20px;}");
-        html.append(".card{background:#fff;border-radius:8px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,0.1);}");
+        html.append(".top-header{display:flex;align-items:center;justify-content:space-between;gap:16px;}");
+        html.append(".top-header .brand{display:flex;align-items:center;gap:10px;font-weight:bold;}");
+        html.append(".top-header .brand .logo{font-size:18px;letter-spacing:1px;}");
+        html.append(".top-header .brand .system{font-size:13px;color:#6b7280;}");
+        html.append(".top-header .brand-logo svg{height:28px;}");
+        html.append(".top-header .right{display:flex;gap:14px;font-size:12px;color:#4b5563;}");
+        html.append(".card{background:#fff;border-radius:8px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,0.04);}");
         html.append(".summary{display:flex;gap:12px;margin-bottom:16px;}");
-        html.append(".summary .box{flex:1;background:#e5e7eb;border-radius:8px;padding:12px;}");
+        html.append(".summary .box{flex:1;background:#f3f4f6;border-radius:8px;padding:12px;}");
         html.append(".chart{display:flex;align-items:flex-end;gap:6px;height:180px;border:1px solid #e5e7eb;border-radius:6px;padding:8px;}");
         html.append(".chart .bar{width:16px;background:#60a5fa;border-radius:4px 4px 0 0;}");
         html.append(".chart .bar.target{background:#34d399;}");
         html.append(".action-bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}");
-        html.append(".btn{padding:6px 10px;border-radius:6px;border:1px solid #cbd5e1;background:#f8fafc;cursor:pointer;}");
-        html.append(".btn.primary{background:#2563eb;color:#fff;border-color:#2563eb;}");
-        html.append(".home-hero{background:linear-gradient(135deg,#0b47cf,#0a2d78);color:#fff;border-radius:14px;padding:28px;}");
+        html.append(".btn{min-width:96px;height:32px;padding:0 10px;border-radius:6px;border:1px solid #e5e5e5;background:#fff;cursor:pointer;color:#1f1f1f;}");
+        html.append(".btn.primary{background:#1677ff;color:#fff;border-color:#1677ff;}");
+        html.append(".btn.large{height:44px;}");
+        html.append(".home-hero{background:linear-gradient(180deg,#0b4ea2,#0c7cd5,#063763);color:#fff;border-radius:0;padding:28px;}");
         html.append(".home-hero-top{display:flex;align-items:center;justify-content:space-between;gap:16px;}");
         html.append(".home-logo{font-weight:bold;font-size:20px;letter-spacing:1px;}");
         html.append(".home-links{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;}");
-        html.append(".home-links a{color:#e2e8f0;text-decoration:none;}");
+        html.append(".home-links a{color:#e6f7ff;text-decoration:none;}");
         html.append(".home-hero-center{margin-top:40px;text-align:center;}");
         html.append(".home-hero-center h1{margin:0 0 8px 0;font-size:32px;letter-spacing:1px;}");
-        html.append(".home-hero-center h2{margin:0 0 10px 0;font-size:18px;font-weight:normal;color:#dbeafe;}");
-        html.append(".home-hero-center p{margin:0;color:#cbd5f5;font-size:13px;}");
-        html.append(".home-footer{background:#071b3f;color:#a5b4fc;border-radius:0 0 14px 14px;padding:18px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;}");
+        html.append(".home-hero-center h2{margin:0 0 10px 0;font-size:18px;font-weight:normal;color:#e9f4ff;}");
+        html.append(".home-hero-center p{margin:0;color:#e6f7ff;font-size:13px;}");
+        html.append(".home-footer{background:#071b3f;color:#a5b4fc;border-radius:0;padding:18px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;}");
         html.append(".home-footer a{color:#93c5fd;text-decoration:none;font-size:12px;}");
+        html.append(".modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:none;align-items:center;justify-content:center;z-index:999;}");
+        html.append(".modal{background:#fff;border-radius:16px;max-width:880px;width:90%;padding:0;box-shadow:0 10px 30px rgba(0,0,0,0.2);overflow:hidden;}");
+        html.append(".modal.split{display:grid;grid-template-columns:1fr 1fr;}");
+        html.append(".modal-left{padding:28px;background:#fff;}");
+        html.append(".modal-right{padding:28px;background:#10a0e3;color:#e9f4ff;position:relative;}");
+        html.append(".modal-close{position:absolute;top:14px;right:14px;background:transparent;border:1px solid rgba(255,255,255,0.4);color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;}");
+        html.append(".modal h3{margin:0 0 8px 0;color:#0f172a;}");
+        html.append(".modal label{display:block;font-size:12px;color:#475569;margin-top:8px;}");
+        html.append(".modal input{width:100%;padding:8px;border-radius:6px;border:1px solid #cbd5e1;margin-top:4px;}");
+        html.append(".modal .modal-actions{display:flex;gap:8px;margin-top:16px;justify-content:flex-start;}");
+        html.append(".modal .hint{margin-top:8px;font-size:12px;color:#64748b;}");
+        html.append(".modal .msg{margin-top:8px;font-size:12px;color:#0f172a;}");
+        html.append(".login-wrap{display:grid;grid-template-columns:1.1fr 0.9fr;gap:0;border-radius:16px;overflow:hidden;box-shadow:0 10px 25px rgba(0,0,0,0.15);max-width:880px;margin:0 auto;}");
+        html.append(".login-hero{background:#10a0e3;color:#e9f4ff;padding:28px;}");
+        html.append(".login-hero h2{margin:0 0 8px 0;font-size:22px;}");
+        html.append(".login-hero p{margin:0;color:#e6f7ff;font-size:13px;}");
+        html.append(".login-panel{background:#fff;padding:28px;}");
+        html.append(".login-panel h3{margin:0 0 6px 0;color:#0f172a;font-size:20px;}");
+        html.append(".login-panel .sub{font-size:12px;color:#6b7280;margin-bottom:12px;}");
+        html.append(".login-panel .actions{display:flex;gap:8px;margin-top:16px;justify-content:flex-start;}");
+        html.append(".login-panel .helper{margin-top:8px;font-size:12px;color:#64748b;}");
+        html.append(".login-panel .login-msg{margin-top:8px;font-size:12px;color:#0f172a;}");
+        html.append(".login-field{margin-top:12px;}");
+        html.append(".login-field .label{font-size:12px;color:#1f1f1f;margin-bottom:6px;}");
+        html.append(".login-field .label .req{color:#ef4444;margin-right:4px;}");
+        html.append(".input-wrap{position:relative;}");
+        html.append(".input-wrap .icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:14px;color:#9ca3af;}");
+        html.append(".input-wrap input{width:100%;padding:10px 10px 10px 30px;border-radius:8px;border:1px solid #e5e5e5;}");
+        html.append(".input-wrap .toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:12px;color:#9ca3af;cursor:pointer;}");
+        html.append(".remember{margin-top:10px;font-size:12px;color:#4b5563;display:flex;align-items:center;gap:6px;}");
+        html.append(".link-right{margin-top:10px;font-size:12px;text-align:right;}");
+        html.append(".link-right a{color:#1677ff;text-decoration:none;}");
         html.append("</style>");
         html.append("</head>");
         html.append("<body>");
-        html.append("<header>MES UI 스캐폴딩</header>");
+        html.append("<header>");
+        html.append("<div class=\"top-header\">");
+        html.append("<div class=\"brand\">");
+        html.append("<div class=\"brand-logo\">");
+        html.append("<img src=\"/withwin_logo.png\" alt=\"위드윈\" style=\"height:28px;\" />");
+        html.append("</div>");
+        html.append("</div>");
+        html.append("<div class=\"right\">");
+        html.append("<div>업체명: 미지정</div>");
+        html.append("<div>Guest 로그인되었습니다.</div>");
+        html.append("</div>");
+        html.append("</div>");
+        html.append("</header>");
         html.append("<div class=\"wrap\">");
         html.append("<nav>");
         html.append("<div>메뉴</div>");
@@ -101,32 +152,110 @@ public final class UiPageTemplate {
         html.append("</div>");
         // 홈(메인) 화면은 첨부 이미지 스타일로 구성한다.
         // 이유: 로그인 영역을 제외한 "소개 + 상단 링크 + 하단 링크" 구성을 그대로 맞추기 위해서다.
-        if ("/ui/dashboard/production".equals(currentPath)) {
+        if ("/ui/dashboard/production".equals(currentPath) || "/ui/main".equals(currentPath)) {
             html.append("<div style=\"margin-bottom:16px;\">");
             html.append("<div class=\"home-hero\">");
             html.append("<div class=\"home-hero-top\">");
             html.append("<div>");
-            html.append("<div class=\"home-logo\">HID</div>");
-            html.append("<div style=\"font-size:11px;color:#cbd5f5;\">Innovations</div>");
+            html.append("<div class=\"home-logo\"><img src=\"/withwin_logo.png\" alt=\"위드윈\" style=\"height:28px;\" /></div>");
             html.append("</div>");
             html.append("<div class=\"home-links\">");
-            html.append("<a href=\"/ui/operation\">Operation</a>");
-            html.append("<a href=\"/ui/gear\">Gear Fraction</a>");
-            html.append("<a href=\"/ui/sitemap\">Sitemap</a>");
+            html.append("<a href=\"/ui/main\">Dashboard</a>");
+            html.append("<a href=\"/ui/signup\">회원가입</a>");
+            html.append("<a href=\"#\" id=\"home-login-open\">Login</a>");
             html.append("</div>");
             html.append("</div>");
             html.append("<div class=\"home-hero-center\">");
             html.append("<h1>MES</h1>");
-            html.append("<h2>Manufacturing Execution Systems</h2>");
-            html.append("<p>제조 공정과 운영 효율을 높이는 실행 시스템입니다.</p>");
+            html.append("<h2>Manufacturing Execution System</h2>");
+            html.append("<p>위드윈 MES는  제조 현장에서 생산 프로세스를 모니터링하고 제어하기 위해 제조에 사용되는 소프트웨어 기반 솔루션입니다.</p>");
             html.append("</div>");
             html.append("</div>");
             html.append("<div class=\"home-footer\">");
-            html.append("<div>© 2019 (주)메인페이지</div>");
+            html.append("<div>&copy; 2025 위드윈</div>");
             html.append("<div style=\"display:flex;gap:18px;flex-wrap:wrap;\">");
             html.append("<a href=\"/ui/about\">About Us</a>");
-            html.append("<a href=\"/ui/license\">MIT License</a>");
-            html.append("<span style=\"font-size:12px;color:#93c5fd;\">Quamamua V1.3</span>");
+            html.append("<a href=\"/ui/license\">MES License</a>");
+            html.append("<span style=\"font-size:12px;color:#93c5fd;\">MES V1.0</span>");
+            html.append("</div>");
+            html.append("</div>");
+            html.append("</div>");
+            // 홈 로그인 모달(팝업) 영역: 상단 Login 클릭 시 노출된다.
+            html.append("<div class=\"modal-backdrop\" id=\"home-login-modal\">");
+            html.append("<div class=\"modal split\">");
+            html.append("<div class=\"modal-left\">");
+            html.append("<h3>Login</h3>");
+            html.append("<p class=\"hint\">Sign in to your account</p>");
+            html.append("<div class=\"login-field\">");
+            html.append("<div class=\"label\"><span class=\"req\">*</span>아이디</div>");
+            html.append("<div class=\"input-wrap\">");
+            html.append("<span class=\"icon\">👤</span>");
+            html.append("<input id=\"home-login-id\" placeholder=\"아이디\" />");
+            html.append("</div>");
+            html.append("</div>");
+            html.append("<div class=\"login-field\">");
+            html.append("<div class=\"label\"><span class=\"req\">*</span>비밀번호</div>");
+            html.append("<div class=\"input-wrap\">");
+            html.append("<span class=\"icon\">🔒</span>");
+            html.append("<input id=\"home-login-pw\" type=\"password\" placeholder=\"비밀번호\" />");
+            html.append("<span class=\"toggle\" id=\"home-login-toggle\">표시</span>");
+            html.append("</div>");
+            html.append("</div>");
+            html.append("<div class=\"remember\">");
+            html.append("<input type=\"checkbox\" id=\"home-login-remember\" /> Remember me?");
+            html.append("</div>");
+            html.append("<div class=\"modal-actions\">");
+            html.append("<button class=\"btn primary large\" id=\"home-login-submit\">Login</button>");
+            html.append("</div>");
+            html.append("<div class=\"msg\" id=\"home-login-msg\"></div>");
+            html.append("<div class=\"link-right\"><a href=\"/ui/signup\">회원가입</a></div>");
+            html.append("</div>");
+            html.append("<div class=\"modal-right\">");
+            html.append("<button class=\"modal-close\" id=\"home-login-close\">×</button>");
+            html.append("<h3 style=\"color:#e9f4ff;margin-top:28px;\">Login</h3>");
+            html.append("<p style=\"color:#e6f7ff;font-size:13px;\">사전에 등록한 사용자만 로그인할 수 있습니다. 처음 접속한 경우에는 ID와 동일한 PASSWORD를 입력하고 이후 새로운 PASSWORD로 변경합니다.</p>");
+            html.append("</div>");
+            html.append("</div>");
+            html.append("</div>");
+        }
+        if ("/ui/login".equals(currentPath)) {
+            // 로그인 화면은 I-LOGIN 템플릿을 기준으로 아이디/비밀번호 입력 폼을 제공한다.
+            // 이유: MES-System v0.5 가이드의 SCR-0002 요구사항을 반영하기 위해서다.
+            html.append("<div style=\"margin-bottom:16px;\">");
+            html.append("<div class=\"login-wrap\">");
+            html.append("<div class=\"login-panel\">");
+            html.append("<h3>Login</h3>");
+            html.append("<div class=\"sub\">Sign in to your account</div>");
+            html.append("<div class=\"login-field\">");
+            html.append("<div class=\"label\"><span class=\"req\">*</span>아이디</div>");
+            html.append("<div class=\"input-wrap\">");
+            html.append("<span class=\"icon\">👤</span>");
+            html.append("<input id=\"login-user-id\" placeholder=\"아이디\" />");
+            html.append("</div>");
+            html.append("</div>");
+            html.append("<div class=\"login-field\">");
+            html.append("<div class=\"label\"><span class=\"req\">*</span>비밀번호</div>");
+            html.append("<div class=\"input-wrap\">");
+            html.append("<span class=\"icon\">🔒</span>");
+            html.append("<input id=\"login-user-password\" type=\"password\" placeholder=\"비밀번호\" />");
+            html.append("<span class=\"toggle\" id=\"login-toggle\">표시</span>");
+            html.append("</div>");
+            html.append("</div>");
+            html.append("<div class=\"actions\">");
+            html.append("<button class=\"btn primary large\" id=\"login-submit\">Login</button>");
+            html.append("</div>");
+            html.append("<div class=\"remember\">");
+            html.append("<input type=\"checkbox\" id=\"login-remember\" /> Remember me?");
+            html.append("</div>");
+            html.append("<div class=\"link-right\"><a href=\"/ui/signup\">회원가입</a></div>");
+            html.append("<div class=\"login-msg\" id=\"login-msg\"></div>");
+            html.append("<div class=\"helper\">로그인 실패 시 관리자에게 문의하세요.</div>");
+            html.append("</div>");
+            html.append("<div class=\"login-hero\">");
+            html.append("<button class=\"modal-close\" id=\"login-close\">×</button>");
+            html.append("<h2>Login</h2>");
+            html.append("<p style=\"margin-top:6px;\">사전에 등록한 사용자만 로그인할 수 있습니다.</p>");
+            html.append("<p style=\"margin-top:6px;\">처음 접속한 경우에는 ID와 동일한 PASSWORD를 입력하고 이후 새로운 PASSWORD로 변경합니다.</p>");
             html.append("</div>");
             html.append("</div>");
             html.append("</div>");
@@ -1340,6 +1469,76 @@ public final class UiPageTemplate {
             html.append("})();");
             html.append("</script>");
         }
+        if ("/ui/dashboard/production".equals(currentPath) || "/ui/main".equals(currentPath)) {
+            // 홈 로그인 모달은 상단 Login 클릭으로 열고, 닫기/바깥 클릭으로 닫는다.
+            // 이유: 별도 페이지 이동 없이 로그인 흐름을 확인하기 위해서다.
+            html.append("<script>");
+            html.append("(function(){");
+            html.append("var openBtn=document.getElementById(\"home-login-open\");");
+            html.append("var modal=document.getElementById(\"home-login-modal\");");
+            html.append("var closeBtn=document.getElementById(\"home-login-close\");");
+            html.append("var toggleBtn=document.getElementById(\"home-login-toggle\");");
+            html.append("var submitBtn=document.getElementById(\"home-login-submit\");");
+            html.append("var msgBox=document.getElementById(\"home-login-msg\");");
+            html.append("function openModal(){if(modal){modal.style.display=\"flex\";}}");
+            html.append("function closeModal(){if(modal){modal.style.display=\"none\";}}");
+            html.append("if(openBtn){openBtn.addEventListener(\"click\",function(e){e.preventDefault();openModal();});}");
+            html.append("if(closeBtn){closeBtn.addEventListener(\"click\",function(){closeModal();});}");
+            html.append("if(modal){modal.addEventListener(\"click\",function(e){if(e.target===modal){closeModal();}});}");
+            html.append("if(toggleBtn){toggleBtn.addEventListener(\"click\",function(){");
+            html.append("var pw=document.getElementById(\"home-login-pw\");");
+            html.append("if(!pw){return;}");
+            html.append("var isPassword=pw.getAttribute(\"type\")===\"password\";");
+            html.append("pw.setAttribute(\"type\",isPassword?\"text\":\"password\");");
+            html.append("toggleBtn.textContent=isPassword?\"숨김\":\"표시\";");
+            html.append("});}");
+            html.append("if(submitBtn){submitBtn.addEventListener(\"click\",function(){");
+            html.append("var id=document.getElementById(\"home-login-id\").value;");
+            html.append("var pw=document.getElementById(\"home-login-pw\").value;");
+            html.append("if(!id||!pw){");
+            html.append("if(msgBox){msgBox.textContent=\"아이디와 비밀번호를 입력하세요.\";}");
+            html.append("return;");
+            html.append("}");
+            html.append("if(msgBox){msgBox.textContent=\"로그인 검증은 추후 실제 인증으로 연결됩니다.\";}");
+            html.append("});}");
+            html.append("})();");
+            html.append("</script>");
+        }
+        if ("/ui/login".equals(currentPath)) {
+            // 로그인 화면은 필수 입력 검증과 초기화 동작을 제공한다.
+            // 이유: I-LOGIN 템플릿의 필수 항목을 사용자에게 명확히 안내하기 위해서다.
+            html.append("<script>");
+            html.append("(function(){");
+            html.append("var submit=document.getElementById(\"login-submit\");");
+            html.append("var reset=document.getElementById(\"login-reset\");");
+            html.append("var toggle=document.getElementById(\"login-toggle\");");
+            html.append("var close=document.getElementById(\"login-close\");");
+            html.append("var msg=document.getElementById(\"login-msg\");");
+            html.append("function setMsg(text){if(msg){msg.textContent=text||\"\";}}");
+            html.append("if(submit){submit.addEventListener(\"click\",function(){");
+            html.append("var id=document.getElementById(\"login-user-id\").value;");
+            html.append("var pw=document.getElementById(\"login-user-password\").value;");
+            html.append("if(!id||!pw){setMsg(\"사용자 ID와 비밀번호를 입력하세요.\");return;}");
+            html.append("setMsg(\"로그인 검증은 추후 실제 인증으로 연결됩니다.\");");
+            html.append("});}");
+            html.append("if(reset){reset.addEventListener(\"click\",function(){");
+            html.append("document.getElementById(\"login-user-id\").value=\"\";");
+            html.append("document.getElementById(\"login-user-password\").value=\"\";");
+            html.append("setMsg(\"\");");
+            html.append("});}");
+            html.append("if(toggle){toggle.addEventListener(\"click\",function(){");
+            html.append("var pw=document.getElementById(\"login-user-password\");");
+            html.append("if(!pw){return;}");
+            html.append("var isPassword=pw.getAttribute(\"type\")===\"password\";");
+            html.append("pw.setAttribute(\"type\",isPassword?\"text\":\"password\");");
+            html.append("toggle.textContent=isPassword?\"숨김\":\"표시\";");
+            html.append("});}");
+            html.append("if(close){close.addEventListener(\"click\",function(){");
+            html.append("window.location.href=\"/ui/main\";");
+            html.append("});}");
+            html.append("})();");
+            html.append("</script>");
+        }
         // 페이지 하단 제목/경로 영역.
         html.append("<div class=\"card\">");
         html.append("<h1>").append(escape(heading)).append("</h1>");
@@ -1369,3 +1568,15 @@ public final class UiPageTemplate {
             .replace("\"", "&quot;");
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+

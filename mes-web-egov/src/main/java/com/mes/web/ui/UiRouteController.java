@@ -24,6 +24,7 @@ public class UiRouteController {
     // 이유: 브라우저 인코딩 자동 판단이 실패할 수 있기 때문이다.
     @GetMapping(value = {
         "/ui/login",
+        "/ui/main",
         "/ui/account/change-password",
         "/ui/dashboard/production",
         "/ui/calendar",
