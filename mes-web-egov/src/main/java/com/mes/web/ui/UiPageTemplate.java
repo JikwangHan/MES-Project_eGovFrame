@@ -88,6 +88,32 @@ public final class UiPageTemplate {
         html.append("<strong>알림/상태 배너</strong>");
         html.append("<p id=\"status-banner-msg\">시스템 상태/주의 메시지는 후속 단계에서 적용합니다.</p>");
         html.append("</div>");
+        // 홈(메인) 화면에는 첫 방문자를 위한 요약/바로가기 안내를 추가한다.
+        // 이유: 사용자가 무엇부터 눌러야 하는지 빠르게 이해하도록 돕기 위해서다.
+        if ("/ui/dashboard/production".equals(currentPath)) {
+            html.append("<div class=\"card\" style=\"margin-bottom:16px;\">");
+            html.append("<strong>메인 시작 안내</strong>");
+            html.append("<p>이 화면은 MES 전체 기능의 첫 진입점입니다. 아래 바로가기로 주요 화면을 빠르게 이동할 수 있습니다.</p>");
+            html.append("</div>");
+            html.append("<div class=\"card\" style=\"margin-bottom:16px;\">");
+            html.append("<strong>핵심 바로가기</strong>");
+            html.append("<div style=\"display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:8px;\">");
+            html.append("<a class=\"btn\" href=\"/ui/login\">로그인</a>");
+            html.append("<a class=\"btn\" href=\"/ui/kpi\">KPI 관리</a>");
+            html.append("<a class=\"btn\" href=\"/ui/orders\">수주 관리</a>");
+            html.append("<a class=\"btn\" href=\"/ui/jobs\">작업 관리</a>");
+            html.append("<a class=\"btn\" href=\"/ui/equipment\">설비 관리</a>");
+            html.append("<a class=\"btn\" href=\"/ui/external-sync/logs\">외부 연계 이력</a>");
+            html.append("</div>");
+            html.append("</div>");
+            html.append("<div class=\"card\" style=\"margin-bottom:16px;\">");
+            html.append("<strong>오늘의 운영 요약(예정)</strong>");
+            html.append("<ul style=\"margin-top:8px;padding-left:16px;color:#0f172a;\">");
+            html.append("<li>주요 공정 진행률, 설비 가동률, 품질 지표는 데이터 연동 후 표시됩니다.</li>");
+            html.append("<li>현재는 화면 구조 검증을 위한 스캐폴딩 상태입니다.</li>");
+            html.append("</ul>");
+            html.append("</div>");
+        }
         // 현재 화면 설명을 노출한다.
         html.append("<div class=\"card\" style=\"margin-bottom:16px;\">");
         html.append("<strong>페이지 설명</strong>");
