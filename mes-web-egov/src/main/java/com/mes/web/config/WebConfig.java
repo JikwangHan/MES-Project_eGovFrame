@@ -4,6 +4,8 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.mes.web.api.ApiController;
 import com.mes.web.db.DbSupport;
@@ -14,7 +16,7 @@ import com.mes.web.ui.UiRouteController;
 @Configuration
 @EnableWebMvc
 @ComponentScan(basePackages = "com.mes.web")
-public class WebConfig {
+public class WebConfig implements WebMvcConfigurer {
     // 초보자 설명:
     // - 이 클래스는 "스프링이 어떤 구성요소를 실행할지"를 알려주는 설정 파일이다.
     // - @Bean으로 등록된 클래스는 스프링이 자동으로 생성해서 관리한다.
@@ -61,5 +63,13 @@ public class WebConfig {
     public UiRouteController uiRouteController() {
         // 실제 화면 주소(/ui/...)를 공통 템플릿으로 연결한다.
         return new UiRouteController();
+    }
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        // 목적: 정적 리소스(로고/이미지)를 / 경로로 제공한다.
+        // 이유: 스캐폴딩 단계에서도 화면 로고가 깨지지 않도록 보장하기 위해서다.
+        registry.addResourceHandler("/**")
+            .addResourceLocations("classpath:/static/");
     }
 }
