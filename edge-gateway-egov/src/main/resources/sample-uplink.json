@@ -4,10 +4,11 @@
   "timestamp": "2025-12-24T00:00:00",
   "nonce": "n-001",
   "signature": "sample",
+  "status": "RUNNING",
   "telemetry": {
-    "status": "OK",
     "metrics": {
-      "qty": 1
+      "qty": 1,
+      "rpm": 1200
     }
   }
 }

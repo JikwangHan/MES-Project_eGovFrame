@@ -12,6 +12,8 @@ public enum GatewayLogReason {
     UPLINK_SEND_ERROR,
     // 업링크 응답 코드가 기대와 다른 경우.
     UPLINK_BAD_STATUS,
+    // 업링크 페이로드가 계약(초안) 기준에 맞지 않는 경우.
+    UPLINK_PAYLOAD_INVALID,
     // 다운링크 URL이 없는 경우.
     DOWNLINK_URL_MISSING,
     // 다운링크 조회 결과 명령이 없는 경우.
